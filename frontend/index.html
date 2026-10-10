@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EMIAS | Hospital Portal</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f4f8fb;
+            color: #1f2937;
+        }
+
+        .header {
+            background: #0f4c5c;
+            color: white;
+            padding: 20px 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+        }
+
+        .header p {
+            margin-top: 5px;
+            opacity: 0.85;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            color: #0f4c5c;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #6b7280;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 13px 22px;
+            border: none;
+            border-radius: 8px;
+            background: #0f4c5c;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0b3945;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .patient-card {
+            background: #f8fafc;
+            border-left: 5px solid #0f4c5c;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+
+        .patient-card h3 {
+            color: #0f4c5c;
+            margin-bottom: 20px;
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .patient-field {
+            background: white;
+            padding: 13px;
+            border-radius: 6px;
+        }
+
+        .patient-field strong {
+            display: block;
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 700px) {
+            .patient-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+    <h1>EMIAS</h1>
+    <p>Emergency Medical Information & Assistance System</p>
+</header>
+
+<main class="container">
+
+    <!-- LOGIN -->
+    <section class="card" id="loginSection">
+
+        <h2>Hospital Login</h2>
+
+        <p class="description">
+            Authorized hospitals can securely access emergency
+            patient information.
+        </p>
+
+        <label for="email">Hospital Email</label>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="metro@example.com"
+        >
+
+        <label for="password">Password</label>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Enter password"
+        >
+
+        <button onclick="hospitalLogin()">
+            Login
+        </button>
+
+        <div id="loginMessage"></div>
+
+    </section>
+
+
+    <!-- PATIENT SEARCH -->
+    <section class="card hidden" id="searchSection">
+
+        <h2>Patient Search</h2>
+
+        <p class="description">
+            Enter the patient's unique EMIAS ID to retrieve
+            emergency medical information.
+        </p>
+
+        <input
+            type="text"
+            id="emiasId"
+            placeholder="e.g. EMIAS-583970B2"
+        >
+
+        <button onclick="searchPatient()">
+            Search Patient
+        </button>
+
+        <button onclick="logout()" style="margin-left: 10px;">
+            Logout
+        </button>
+
+        <div id="result"></div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+    const API_URL = "http://127.0.0.1:8000";
+
+
+    // -----------------------------
+    // HOSPITAL LOGIN
+    // -----------------------------
+
+    async function hospitalLogin() {
+
+        const email =
+            document.getElementById("email").value.trim();
+
+        const password =
+            document.getElementById("password").value;
+
+        const message =
+            document.getElementById("loginMessage");
+
+
+        if (!email || !password) {
+
+            message.innerHTML = `
+                <div class="message error">
+                    Please enter email and password.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        try {
+
+            const formData = new URLSearchParams();
+
+            formData.append("username", email);
+            formData.append("password", password);
+
+
+            const response = await fetch(
+                `${API_URL}/auth/hospital/login`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded"
+                    },
+
+                    body: formData
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok) {
+
+                message.innerHTML = `
+                    <div class="message error">
+                        ${data.detail || "Login failed."}
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            // Store JWT token
+            localStorage.setItem(
+                "emias_token",
+                data.access_token
+            );
+
+
+            message.innerHTML = `
+                <div class="message success">
+                    Login successful.
+                </div>
+            `;
+
+
+            // Show patient search
+            document
+                .getElementById("loginSection")
+                .classList.add("hidden");
+
+            document
+                .getElementById("searchSection")
+                .classList.remove("hidden");
+
+        }
+
+        catch (error) {
+
+            message.innerHTML = `
+                <div class="message error">
+                    Could not connect to EMIAS backend.
+                </div>
+            `;
+
+            console.error(error);
+        }
+    }
+
+
+    // -----------------------------
+    // PATIENT SEARCH
+    // -----------------------------
+
+    async function searchPatient() {
+
+        const emiasId =
+            document
+                .getElementById("emiasId")
+                .value
+                .trim();
+
+        const result =
+            document.getElementById("result");
+
+
+        if (!emiasId) {
+
+            result.innerHTML = `
+                <div class="message error">
+                    Please enter an EMIAS ID.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        const token =
+            localStorage.getItem("emias_token");
+
+
+        if (!token) {
+
+            result.innerHTML = `
+                <div class="message error">
+                    Please login first.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        result.innerHTML = "Searching...";
+
+
+        try {
+
+            const response = await fetch(
+                `${API_URL}/patients/${emiasId}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Authorization":
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok) {
+
+                if (response.status === 401) {
+
+                    localStorage.removeItem(
+                        "emias_token"
+                    );
+
+                    result.innerHTML = `
+                        <div class="message error">
+                            Session expired. Please login again.
+                        </div>
+                    `;
+
+                }
+                else if (response.status === 404) {
+
+                    result.innerHTML = `
+                        <div class="message error">
+                            Patient not found.
+                        </div>
+                    `;
+
+                }
+                else {
+
+                    result.innerHTML = `
+                        <div class="message error">
+                            ${data.detail || "Unable to retrieve patient."}
+                        </div>
+                    `;
+                }
+
+                return;
+            }
+
+
+            // Display patient information
+
+            result.innerHTML = `
+
+                <div class="patient-card">
+
+                    <h3>
+                        Patient Medical Information
+                    </h3>
+
+                    <div class="patient-grid">
+
+                        <div class="patient-field">
+                            <strong>EMIAS ID</strong>
+                            ${data.emias_id}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Full Name</strong>
+                            ${data.full_name}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Date of Birth</strong>
+                            ${data.date_of_birth}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Gender</strong>
+                            ${data.gender}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Blood Group</strong>
+                            ${data.blood_group || "Not available"}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Phone</strong>
+                            ${data.phone || "Not available"}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Allergies</strong>
+                            ${data.allergies || "None recorded"}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Medical Conditions</strong>
+                            ${data.medical_conditions || "None recorded"}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Medications</strong>
+                            ${data.medications || "None recorded"}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Address</strong>
+                            ${data.address || "Not available"}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Emergency Contact</strong>
+                            ${data.emergency_contact_name || "Not available"}
+                        </div>
+
+                        <div class="patient-field">
+                            <strong>Emergency Contact Phone</strong>
+                            ${data.emergency_contact_phone || "Not available"}
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+        }
+
+        catch (error) {
+
+            result.innerHTML = `
+                <div class="message error">
+                    Could not connect to EMIAS backend.
+                </div>
+            `;
+
+            console.error(error);
+        }
+    }
+
+
+    // -----------------------------
+    // LOGOUT
+    // -----------------------------
+
+    function logout() {
+
+        localStorage.removeItem(
+            "emias_token"
+        );
+
+        document
+            .getElementById("searchSection")
+            .classList.add("hidden");
+
+        document
+            .getElementById("loginSection")
+            .classList.remove("hidden");
+
+        document.getElementById("email").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("emiasId").value = "";
+        document.getElementById("result").innerHTML = "";
+    }
+
+</script>
+
+</body>
+</html>

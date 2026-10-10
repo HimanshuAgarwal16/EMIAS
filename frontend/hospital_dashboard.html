@@ -1,0 +1,3706 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>EMIAS | Hospital Dashboard</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f8fb;
+            color: #1f2937;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+            background: linear-gradient(
+                135deg,
+                #0b5ed7,
+                #0a74da
+            );
+
+            color: white;
+
+            padding: 18px 40px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            box-shadow:
+                0 3px 15px rgba(0, 0, 0, 0.12);
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 46px;
+            height: 46px;
+
+            border-radius: 12px;
+
+            background: rgba(255,255,255,0.18);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 23px;
+
+            font-weight: bold;
+        }
+
+        .brand h1 {
+            font-size: 25px;
+            letter-spacing: 0.5px;
+        }
+
+        .brand p {
+            margin-top: 3px;
+
+            font-size: 13px;
+
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            background: white;
+
+            color: #0b5ed7;
+
+            border: none;
+
+            padding: 10px 18px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            transition: 0.2s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+
+            background: #eef5ff;
+
+            box-shadow:
+                0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        /* =========================
+           MAIN CONTAINER
+        ========================= */
+
+        .container {
+            max-width: 1180px;
+
+            margin: 30px auto;
+
+            padding: 0 20px;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            color: #172554;
+
+            font-size: 25px;
+
+            margin-bottom: 6px;
+        }
+
+        .welcome p {
+            color: #64748b;
+
+            font-size: 14px;
+        }
+
+        /* =========================
+           STAT CARDS
+        ========================= */
+
+        .stats {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 18px;
+
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 20px;
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.06);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+            transition: 0.25s;
+
+            border: 1px solid #edf2f7;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 8px 22px rgba(0,0,0,0.09);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+
+            border-radius: 12px;
+
+            background: #eaf2ff;
+
+            color: #0b5ed7;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 21px;
+
+            font-weight: bold;
+        }
+
+        .stat-card h3 {
+            font-size: 13px;
+
+            color: #64748b;
+
+            margin-bottom: 4px;
+        }
+
+        .stat-card p {
+            font-size: 18px;
+
+            font-weight: bold;
+
+            color: #172554;
+        }
+
+        /* =========================
+           COMMON CARD
+        ========================= */
+
+        .card {
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 25px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.06);
+
+            border: 1px solid #edf2f7;
+        }
+
+        .card-title {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-bottom: 7px;
+        }
+
+        .card-title-icon {
+            width: 36px;
+            height: 36px;
+
+            border-radius: 9px;
+
+            background: #eaf2ff;
+
+            color: #0b5ed7;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            font-weight: bold;
+        }
+
+        .card h2 {
+            color: #172554;
+
+            font-size: 20px;
+        }
+
+        .card-description {
+            color: #64748b;
+
+            font-size: 14px;
+
+            margin-bottom: 20px;
+
+            line-height: 1.5;
+        }
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        .search-box {
+            display: flex;
+
+            gap: 12px;
+        }
+
+        .input-wrapper {
+            position: relative;
+
+            flex: 1;
+        }
+
+        .input-wrapper span {
+            position: absolute;
+
+            left: 14px;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: #64748b;
+
+            font-size: 15px;
+        }
+
+        .search-box input {
+            width: 100%;
+
+            padding: 14px 15px 14px 42px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 9px;
+
+            font-size: 15px;
+
+            outline: none;
+
+            transition: 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: #0b5ed7;
+
+            box-shadow:
+                0 0 0 3px rgba(11,94,215,0.1);
+        }
+
+        .search-btn {
+            min-width: 155px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background: #0b5ed7;
+
+            color: white;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+
+            font-size: 14px;
+        }
+
+        .search-btn:hover {
+            background: #084298;
+
+            transform: translateY(-1px);
+        }
+
+        .search-btn.loading {
+            opacity: 0.75;
+
+            cursor: wait;
+        }
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        .message {
+            margin-top: 15px;
+
+            padding: 13px 15px;
+
+            border-radius: 8px;
+
+            display: none;
+
+            font-size: 14px;
+        }
+
+        .error {
+            background: #fee2e2;
+
+            color: #991b1b;
+
+            border: 1px solid #fecaca;
+        }
+
+        .success {
+            background: #dcfce7;
+
+            color: #166534;
+
+            border: 1px solid #bbf7d0;
+        }
+
+        /* =========================
+           PATIENT CARD
+        ========================= */
+
+        .patient-card {
+            display: none;
+
+            background: white;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,0.07);
+
+            overflow: hidden;
+
+            margin-bottom: 25px;
+
+            border: 1px solid #e5e7eb;
+
+            animation: fadeIn 0.35s ease;
+        }
+
+        @keyframes fadeIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+        .patient-header {
+            background:
+                linear-gradient(
+                    135deg,
+                    #eaf2ff,
+                    #f5f9ff
+                );
+
+            padding: 25px;
+
+            border-bottom: 1px solid #dbeafe;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+        }
+
+        .patient-title {
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+        }
+
+        .patient-avatar {
+            width: 58px;
+            height: 58px;
+
+            border-radius: 50%;
+
+            background: #0b5ed7;
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 22px;
+
+            font-weight: bold;
+        }
+
+        .patient-header h2 {
+            color: #0b5ed7;
+
+            font-size: 21px;
+        }
+
+        .patient-header p {
+            margin-top: 5px;
+
+            color: #64748b;
+
+            font-size: 13px;
+        }
+
+        .secure-badge {
+            background: #dcfce7;
+
+            color: #166534;
+
+            padding: 7px 11px;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+        /* =========================
+           SECTIONS
+        ========================= */
+
+        .section {
+            padding: 25px;
+
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section h3 {
+            color: #172554;
+
+            margin-bottom: 18px;
+
+            font-size: 17px;
+        }
+
+        .grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 15px;
+        }
+
+        .field {
+            background: #f8fafc;
+
+            padding: 16px;
+
+            border-radius: 10px;
+
+            border: 1px solid #eef2f7;
+
+            transition: 0.2s;
+        }
+
+        .field:hover {
+            background: #f1f6fb;
+
+            border-color: #dbeafe;
+        }
+
+        .field label {
+            display: block;
+
+            font-size: 11px;
+
+            color: #64748b;
+
+            margin-bottom: 7px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.4px;
+        }
+
+        .field span {
+            font-size: 15px;
+
+            font-weight: 500;
+
+            color: #1e293b;
+
+            word-break: break-word;
+        }
+
+        /* =========================
+           MEDICAL HIGHLIGHTS
+        ========================= */
+
+        .medical-highlight {
+            border-left: 4px solid #0b5ed7;
+        }
+
+        .medical-highlight.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .medical-highlight.danger {
+            border-left-color: #dc2626;
+        }
+
+        /* =========================
+           ACCESS HISTORY
+        ========================= */
+
+        .history-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 18px;
+        }
+
+        .history-btn {
+            padding: 11px 18px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #0b5ed7;
+
+            color: white;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .history-btn:hover {
+            background: #084298;
+        }
+
+        .history-btn.loading {
+            opacity: 0.7;
+
+            cursor: wait;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+
+            border: 1px solid #e5e7eb;
+
+            border-radius: 10px;
+
+            display: none;
+        }
+
+        #logs-table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 600px;
+        }
+
+        #logs-table th {
+            background: #eaf2ff;
+
+            color: #1e3a8a;
+
+            padding: 13px;
+
+            text-align: left;
+
+            font-size: 13px;
+        }
+
+        #logs-table td {
+            padding: 13px;
+
+            border-bottom: 1px solid #edf2f7;
+
+            font-size: 13px;
+        }
+
+        #logs-table tbody tr {
+            transition: 0.15s;
+        }
+
+        #logs-table tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        #logs-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .action-badge {
+            display: inline-block;
+
+            padding: 5px 9px;
+
+            background: #eaf2ff;
+
+            color: #0b5ed7;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+
+            font-weight: bold;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            text-align: center;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+
+            padding: 10px 0 30px;
+        }
+
+        /* =========================
+           LOADING SPINNER
+        ========================= */
+
+        .spinner {
+            display: inline-block;
+
+            width: 15px;
+            height: 15px;
+
+            border: 2px solid rgba(255,255,255,0.5);
+
+            border-top-color: white;
+
+            border-radius: 50%;
+
+            animation: spin 0.7s linear infinite;
+
+            vertical-align: middle;
+
+            margin-right: 7px;
+        }
+
+        @keyframes spin {
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+        /* =========================
+           AI MEDICAL REPORT
+        ========================= */
+
+        .ai-report-section {
+            background: white;
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 1px solid #edf2f7;
+        }
+
+        .ai-report-section h2 {
+            color: #172554;
+            font-size: 20px;
+            margin-bottom: 7px;
+        }
+
+        .ai-report-section > p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .ai-report-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .ai-report-card label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            color: #334155;
+            margin-bottom: 7px;
+            margin-top: 16px;
+        }
+
+        .ai-report-card label:first-child {
+            margin-top: 0;
+        }
+
+        .ai-report-card select,
+        .ai-report-card textarea,
+        .ai-report-card input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+        }
+
+        .ai-report-card select:focus,
+        .ai-report-card textarea:focus,
+        .ai-report-card input[type="file"]:focus {
+            outline: none;
+            border-color: #0b5ed7;
+            box-shadow: 0 0 0 3px rgba(11,94,215,0.1);
+        }
+
+        .ai-report-card textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .analyze-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #0b5ed7, #084298);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(11,94,215,0.2);
+        }
+
+        .ai-initial-state {
+            margin-top: 20px;
+            padding: 25px;
+            text-align: center;
+            background: #eef5ff;
+            border: 1px dashed #93c5fd;
+            border-radius: 10px;
+        }
+
+        .ai-state-icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .ai-initial-state h3 {
+            color: #172554;
+            margin-bottom: 6px;
+            font-size: 17px;
+        }
+
+        .ai-initial-state p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 800px) {
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .patient-header {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .header {
+                padding: 16px 20px;
+            }
+
+            .brand h1 {
+                font-size: 21px;
+            }
+
+            .brand p {
+                font-size: 11px;
+            }
+
+            .logout-btn {
+                padding: 9px 12px;
+
+                font-size: 12px;
+            }
+
+            .container {
+                margin: 22px auto;
+
+                padding: 0 14px;
+            }
+
+            .welcome h2 {
+                font-size: 21px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                min-height: 46px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 19px;
+            }
+
+            .section {
+                padding: 19px;
+            }
+
+            .history-header {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .history-btn {
+                width: 100%;
+            }
+
+            .patient-title {
+                align-items: flex-start;
+            }
+
+        }
+
+    
+/* =========================================================
+   EMIAS HOSPITAL DASHBOARD — MODERN UI OVERRIDES
+   Functionality preserved; visual layer redesigned.
+========================================================= */
+
+:root{
+    --bg:#07111f;
+    --panel:#0d1b2d;
+    --panel-2:#10243a;
+    --line:#1d3853;
+    --text:#e7f1fb;
+    --muted:#91a7bb;
+    --cyan:#22d3ee;
+    --blue:#3b82f6;
+    --violet:#8b5cf6;
+    --green:#34d399;
+}
+
+html{scroll-behavior:smooth;}
+
+body{
+    background:
+        radial-gradient(circle at 8% 0%, rgba(34,211,238,.10), transparent 28%),
+        radial-gradient(circle at 92% 8%, rgba(139,92,246,.10), transparent 25%),
+        linear-gradient(180deg,#06101d 0%,#081524 45%,#07111f 100%);
+    color:var(--text);
+    min-height:100vh;
+}
+
+.header{
+    background:rgba(6,16,29,.82);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border-bottom:1px solid rgba(34,211,238,.12);
+    box-shadow:0 10px 35px rgba(0,0,0,.24);
+    padding:16px 42px;
+}
+
+.brand{gap:13px;}
+
+.brand-icon{
+    width:44px;
+    height:44px;
+    border-radius:13px;
+    background:linear-gradient(135deg,rgba(34,211,238,.22),rgba(59,130,246,.22));
+    border:1px solid rgba(34,211,238,.25);
+    color:var(--cyan);
+    box-shadow:0 0 24px rgba(34,211,238,.10);
+}
+
+.brand h1{
+    color:#f3f9ff;
+    font-size:23px;
+    letter-spacing:1px;
+}
+
+.brand p{color:#91a7bb;opacity:1;}
+
+.logout-btn{
+    background:rgba(255,255,255,.05);
+    color:#d9e8f5;
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:10px;
+    padding:10px 17px;
+}
+
+.logout-btn:hover{
+    background:rgba(34,211,238,.10);
+    color:#fff;
+    box-shadow:0 0 22px rgba(34,211,238,.10);
+}
+
+.container{
+    max-width:1240px;
+    margin:34px auto;
+}
+
+.welcome{
+    padding:8px 2px 20px;
+}
+
+.welcome h2{
+    color:#f4f9ff;
+    font-size:30px;
+    letter-spacing:-.5px;
+}
+
+.welcome p{color:var(--muted);}
+
+.stats{
+    gap:16px;
+    margin-bottom:22px;
+}
+
+.stat-card{
+    background:linear-gradient(145deg,rgba(13,27,45,.96),rgba(10,23,39,.96));
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:0 12px 30px rgba(0,0,0,.18);
+}
+
+.stat-card:hover{
+    border-color:rgba(34,211,238,.30);
+    box-shadow:0 14px 35px rgba(0,0,0,.25);
+}
+
+.stat-icon{
+    background:rgba(34,211,238,.08);
+    border:1px solid rgba(34,211,238,.15);
+    color:var(--cyan);
+}
+
+.stat-card h3{color:#7f98ad;}
+.stat-card p{color:#e6f1fa;}
+
+.card,
+.ai-report-section{
+    background:linear-gradient(145deg,rgba(13,27,45,.97),rgba(9,21,36,.97));
+    border:1px solid var(--line);
+    border-radius:17px;
+    box-shadow:0 14px 36px rgba(0,0,0,.18);
+}
+
+.card-title-icon{
+    background:rgba(34,211,238,.08);
+    border:1px solid rgba(34,211,238,.14);
+    color:var(--cyan);
+}
+
+.card h2,
+.ai-report-section h2,
+.section h3{color:#edf6ff;}
+
+.card-description,
+.ai-report-section > p{color:var(--muted);}
+
+.search-box input{
+    background:#081625;
+    color:#edf6ff;
+    border-color:#24415d;
+}
+
+.search-box input::placeholder{color:#61788d;}
+
+.search-box input:focus{
+    border-color:rgba(34,211,238,.65);
+    box-shadow:0 0 0 3px rgba(34,211,238,.08);
+}
+
+.search-btn,
+.history-btn,
+.analyze-btn{
+    background:linear-gradient(135deg,#0891b2,#2563eb);
+    box-shadow:0 8px 22px rgba(37,99,235,.18);
+}
+
+.search-btn:hover,
+.history-btn:hover,
+.analyze-btn:hover{
+    background:linear-gradient(135deg,#06b6d4,#3b82f6);
+}
+
+.patient-card{
+    background:#0d1b2d;
+    border-color:var(--line);
+    box-shadow:0 16px 40px rgba(0,0,0,.22);
+}
+
+.patient-header{
+    background:
+        radial-gradient(circle at 0 0,rgba(34,211,238,.10),transparent 35%),
+        linear-gradient(135deg,#0e2136,#0c1b2e);
+    border-bottom-color:var(--line);
+}
+
+.patient-avatar{
+    background:linear-gradient(135deg,#0891b2,#2563eb);
+    box-shadow:0 0 25px rgba(34,211,238,.15);
+}
+
+.patient-header h2{color:#eaf7ff;}
+.patient-header p{color:var(--muted);}
+
+.secure-badge{
+    background:rgba(52,211,153,.09);
+    color:#6ee7b7;
+    border:1px solid rgba(52,211,153,.20);
+}
+
+.section{border-bottom-color:var(--line);}
+
+.field{
+    background:rgba(7,19,32,.72);
+    border-color:#1d3853;
+}
+
+.field:hover{
+    background:#0d2035;
+    border-color:#2b5274;
+}
+
+.field label{color:#718aa0;}
+.field span{color:#dbe8f3;}
+
+.medical-highlight{border-left-color:#22d3ee;}
+.medical-highlight.warning{border-left-color:#fbbf24;}
+.medical-highlight.danger{border-left-color:#fb7185;}
+
+.ai-report-card{
+    background:#091827;
+    border-color:#1d3853;
+}
+
+.ai-report-card label{color:#a8bdcf;}
+
+.ai-report-card select,
+.ai-report-card textarea,
+.ai-report-card input[type="file"]{
+    background:#071625;
+    color:#e7f1fb;
+    border-color:#24415d;
+}
+
+.ai-report-card select:focus,
+.ai-report-card textarea:focus,
+.ai-report-card input[type="file"]:focus{
+    border-color:rgba(34,211,238,.65);
+    box-shadow:0 0 0 3px rgba(34,211,238,.08);
+}
+
+.ai-initial-state{
+    background:rgba(34,211,238,.035);
+    border-color:rgba(34,211,238,.25);
+}
+
+.ai-initial-state h3{color:#dff8ff;}
+.ai-initial-state p{color:var(--muted);}
+
+#selectedReportPatient{
+    background:rgba(34,211,238,.045) !important;
+    border-color:rgba(34,211,238,.20) !important;
+    color:#dbeaf5;
+}
+
+#selectedReportPatient strong:first-child{color:var(--cyan);}
+
+#reportHistoryContainer{
+    border-radius:12px;
+}
+
+#reportHistoryContainer table{
+    color:#dbe8f3;
+    border:1px solid #1d3853;
+}
+
+#reportHistoryContainer thead tr{
+    background:#10243a !important;
+}
+
+#reportHistoryContainer th{
+    color:#9fc1d8;
+    border-bottom:1px solid #1d3853;
+}
+
+#reportHistoryContainer td{
+    border-bottom-color:#1b334a !important;
+}
+
+#reportHistoryContainer tbody tr:hover{
+    background:#0d2034;
+}
+
+.table-wrapper{
+    border-color:#1d3853;
+}
+
+#logs-table th{
+    background:#10243a;
+    color:#9fc1d8;
+}
+
+#logs-table td{
+    color:#dbe8f3;
+    border-bottom-color:#1b334a;
+}
+
+#logs-table tbody tr:hover{background:#0d2034;}
+
+.action-badge{
+    background:rgba(59,130,246,.10);
+    color:#7dd3fc;
+    border:1px solid rgba(59,130,246,.18);
+}
+
+.footer{
+    color:#60788d;
+    padding-top:4px;
+}
+
+.message.error{
+    background:rgba(239,68,68,.09);
+    color:#fda4af;
+    border-color:rgba(239,68,68,.22);
+}
+
+.message.success{
+    background:rgba(52,211,153,.08);
+    color:#6ee7b7;
+    border-color:rgba(52,211,153,.20);
+}
+
+@media(max-width:700px){
+    .header{padding:14px 18px;}
+    .container{margin:24px auto;}
+    .welcome h2{font-size:25px;}
+}
+
+    
+
+/* =========================================================
+   CONTRAST / VISIBILITY FIXES
+   Keep the futuristic dark dashboard readable even when
+   the AI result and report-history HTML uses inline styles.
+========================================================= */
+
+.ai-result-card,
+.ai-result-card[style] {
+    background:#0b1b2b !important;
+    color:#e7f1fb !important;
+    border-color:#294761 !important;
+}
+
+.ai-result-card h3,
+.ai-result-card h4,
+.ai-result-card p,
+.ai-result-card strong,
+.ai-result-card span,
+.ai-result-card div {
+    color:#e7f1fb;
+}
+
+.ai-result-card > div[style*="background:white"] {
+    background:#10243a !important;
+    border-color:#294761 !important;
+    color:#e7f1fb !important;
+}
+
+.ai-result-card > div[style*="background:white"] div {
+    color:#a9bfd1 !important;
+}
+
+.ai-result-card > div[style*="#ffedd5"] {
+    background:rgba(251,146,60,.12) !important;
+    border:1px solid rgba(251,146,60,.28) !important;
+    color:#ffd8b0 !important;
+}
+
+.ai-result-card > div[style*="#dcfce7"] {
+    background:rgba(34,197,94,.10) !important;
+    border:1px solid rgba(34,197,94,.24) !important;
+    color:#b9f6ca !important;
+}
+
+.ai-result-card p[style*="color:#64748b"],
+.ai-result-card p[style*="color: #64748b"] {
+    color:#9fb4c6 !important;
+}
+
+.ai-result-card h4 {
+    color:#dff8ff !important;
+}
+
+/* Grad-CAM image explanation text */
+.ai-result-card img {
+    border-color:#294761 !important;
+}
+
+/* Medical report history: override old light inline styles */
+#reportHistoryContainer table {
+    background:#0b1b2b !important;
+    color:#dbe8f3 !important;
+}
+
+#reportHistoryContainer thead tr,
+#reportHistoryContainer thead tr[style] {
+    background:#10243a !important;
+}
+
+#reportHistoryContainer th {
+    color:#a9c4d8 !important;
+    border-bottom:1px solid #294761 !important;
+}
+
+#reportHistoryContainer tbody tr,
+#reportHistoryContainer tbody tr[style] {
+    background:#0b1b2b !important;
+    border-bottom:1px solid #203b53 !important;
+}
+
+#reportHistoryContainer tbody tr:nth-child(even) {
+    background:#0e2236 !important;
+}
+
+#reportHistoryContainer tbody tr:hover {
+    background:#15314a !important;
+}
+
+#reportHistoryContainer td {
+    color:#dbe8f3 !important;
+    border-bottom-color:#203b53 !important;
+}
+
+#reportHistoryContainer td div {
+    color:#8fa8bc !important;
+}
+
+#reportHistoryContainer td[style*="font-weight:600"] {
+    font-weight:700 !important;
+}
+
+#reportHistoryContainer button {
+    background:#e8f1fb !important;
+    color:#1769e0 !important;
+}
+
+#reportHistoryContainer button:hover {
+    background:#ffffff !important;
+}
+
+
+/* =========================================================
+   FINAL AI RESULT CONTRAST FIX
+========================================================= */
+
+/* The three Doctor / AI / Confidence cards are nested inside
+   the grid, so target them at any depth. */
+.ai-result-card div[style*="background:white"] {
+    background:#12283d !important;
+    border:1px solid #31536d !important;
+    color:#eaf6ff !important;
+}
+
+/* Labels */
+.ai-result-card div[style*="background:white"] div {
+    color:#9fc1d8 !important;
+}
+
+/* Actual result values */
+.ai-result-card div[style*="background:white"] strong {
+    color:#f2f8ff !important;
+}
+
+/* Main AI heading */
+.ai-result-card h3 {
+    color:#eaf6ff !important;
+}
+
+/* Grad-CAM heading */
+.ai-result-card h4 {
+    color:#dff6ff !important;
+}
+
+/* Supporting explanation */
+.ai-result-card p {
+    color:#c3d5e2 !important;
+}
+
+.ai-result-card p[style*="color:#64748b"],
+.ai-result-card p[style*="color: #64748b"] {
+    color:#9fb4c6 !important;
+}
+
+/* Mismatch / consistency notice text */
+.ai-result-card div[style*="#ffedd5"] {
+    background:rgba(251,146,60,.12) !important;
+    border:1px solid rgba(251,146,60,.30) !important;
+    color:#ffd7ae !important;
+}
+
+.ai-result-card div[style*="#ffedd5"] strong {
+    color:#ffd7ae !important;
+}
+
+.ai-result-card div[style*="#dcfce7"] {
+    background:rgba(34,197,94,.10) !important;
+    border:1px solid rgba(34,197,94,.26) !important;
+    color:#baf5c9 !important;
+}
+
+/* Ensure the result card itself remains dark in both mismatch
+   and consistent states. */
+.ai-result-card[style*="#fff7ed"],
+.ai-result-card[style*="#ecfdf5"] {
+    background:#0b1b2b !important;
+    border-color:#294761 !important;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <header class="header">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                +
+            </div>
+
+            <div>
+
+                <h1>EMIAS</h1>
+
+                <p>
+                    Hospital Emergency Medical Access
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="logout-btn"
+            onclick="logout()"
+        >
+            Logout
+        </button>
+
+    </header>
+
+
+    <main class="container">
+
+
+        <!-- =========================
+             WELCOME
+        ========================== -->
+
+        <div class="welcome">
+
+            <h2>
+                Hospital Dashboard
+            </h2>
+
+            <p>
+                Securely access and manage emergency medical information.
+            </p>
+
+        </div>
+
+
+        <!-- =========================
+             STATS
+        ========================== -->
+
+        <div class="stats">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    +
+                </div>
+
+                <div>
+
+                    <h3>
+                        SYSTEM STATUS
+                    </h3>
+
+                    <p>
+                        Secure
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    ✓
+                </div>
+
+                <div>
+
+                    <h3>
+                        ACCESS TYPE
+                    </h3>
+
+                    <p>
+                        Authorized
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    !
+                </div>
+
+                <div>
+
+                    <h3>
+                        EMERGENCY ACCESS
+                    </h3>
+
+                    <p>
+                        Available
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             PATIENT SEARCH
+        ========================== -->
+
+        <div class="card">
+
+            <div class="card-title">
+
+                <div class="card-title-icon">
+                    🔍
+                </div>
+
+                <h2>
+                    Patient Record Access
+                </h2>
+
+            </div>
+
+
+            <p class="card-description">
+
+                Enter the patient's unique EMIAS ID to securely
+                access emergency medical information.
+
+            </p>
+
+
+            <div class="search-box">
+
+                <div class="input-wrapper">
+
+                    <span>
+                        🔎
+                    </span>
+
+                    <input
+                        type="text"
+                        id="emias_id"
+                        placeholder="Enter EMIAS ID (e.g. EMIAS-52EBC1DB)"
+                        autocomplete="off"
+                        onkeydown="handleSearchKey(event)"
+                    >
+
+                </div>
+
+
+                <button
+                    id="search-button"
+                    class="search-btn"
+                    onclick="searchPatient()"
+                >
+                    Search Patient
+                </button>
+
+            </div>
+
+
+            <div
+                id="message"
+                class="message"
+            >
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             PATIENT CARD
+        ========================== -->
+
+        <div
+            id="patient-card"
+            class="patient-card"
+        >
+
+
+            <div class="patient-header">
+
+                <div class="patient-title">
+
+                    <div
+                        id="patient-avatar"
+                        class="patient-avatar"
+                    >
+                        P
+                    </div>
+
+                    <div>
+
+                        <h2 id="patient-name">
+                            Patient Name
+                        </h2>
+
+                        <p>
+
+                            EMIAS ID:
+
+                            <strong id="patient-emias-id">
+                                -
+                            </strong>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="secure-badge">
+
+                    ✓ Secure Record
+
+                </div>
+
+            </div>
+
+
+            <!-- BASIC INFORMATION -->
+
+            <div class="section">
+
+                <h3>
+                    👤 Basic Information
+                </h3>
+
+
+                <div class="grid">
+
+
+                    <div class="field">
+
+                        <label>
+                            Date of Birth
+                        </label>
+
+                        <span id="date_of_birth">
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Gender
+                        </label>
+
+                        <span id="gender">
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Blood Group
+                        </label>
+
+                        <span id="blood_group">
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Phone
+                        </label>
+
+                        <span id="phone">
+                            -
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- MEDICAL INFORMATION -->
+
+            <div class="section">
+
+                <h3>
+                    🩺 Medical Information
+                </h3>
+
+
+                <div class="grid">
+
+
+                    <div
+                        id="allergy-field"
+                        class="field medical-highlight"
+                    >
+
+                        <label>
+                            Allergies
+                        </label>
+
+                        <span id="allergies">
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="condition-field"
+                        class="field medical-highlight"
+                    >
+
+                        <label>
+                            Medical Conditions
+                        </label>
+
+                        <span id="medical_conditions">
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="field medical-highlight">
+
+                        <label>
+                            Medications
+                        </label>
+
+                        <span id="medications">
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Address
+                        </label>
+
+                        <span id="address">
+                            -
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- EMERGENCY CONTACT -->
+
+            <div class="section">
+
+                <h3>
+                    🚨 Emergency Contact
+                </h3>
+
+
+                <div class="grid">
+
+
+                    <div class="field">
+
+                        <label>
+                            Contact Name
+                        </label>
+
+                        <span id="emergency_contact_name">
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Contact Phone
+                        </label>
+
+                        <span id="emergency_contact_phone">
+                            -
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+
+        <!-- AI Medical Report Analysis -->
+
+        <section class="ai-report-section">
+
+            <h2>Medical Report Analysis</h2>
+
+            <p>
+                Upload a patient's medical report for
+                AI-assisted analysis and clinical validation.
+            </p>
+
+            <div
+    id="selectedReportPatient"
+    style="
+        background:#f0f7ff;
+        border:1px solid #c7ddf7;
+        border-radius:12px;
+        padding:15px 18px;
+        margin:15px 0 20px;
+    "
+>
+    <strong>Patient for this report</strong>
+
+    <div style="margin-top:8px;">
+        <span>Patient:</span>
+        <strong id="reportPatientName">
+            No patient selected
+        </strong>
+    </div>
+
+    <div style="margin-top:4px;">
+        <span>EMIAS ID:</span>
+        <strong id="reportPatientEmias">
+            —
+        </strong>
+    </div>
+</div>
+
+            
+    
+
+
+            <div class="ai-report-card">
+
+                <label for="reportType">
+                    Medical Report Type
+                </label>
+
+                <select id="reportType">
+                    <option value="">Select report type</option>
+                    <option value="ECG">ECG</option>
+                    <option value="X-Ray">X-Ray</option>
+                    <option value="MRI">MRI</option>
+                    <option value="CT">CT Scan</option>
+                    <option value="Blood Report">Blood Report</option>
+                    <option value="Other">Other</option>
+                </select>
+
+
+                <label for="medicalReport">
+                    Upload Medical Report
+                </label>
+
+                <input
+                    type="file"
+                    id="medicalReport"
+                    accept=".jpg,.jpeg,.png,.pdf"
+                >
+
+
+                <label for="doctorDiagnosis">
+                    Doctor's Diagnosis
+                </label>
+
+                <textarea
+                    id="doctorDiagnosis"
+                    rows="4"
+                    placeholder="Enter the diagnosis provided by the doctor..."
+                ></textarea>
+
+
+                <button
+                    type="button"
+                    class="analyze-btn"
+                    onclick="analyzeMedicalReport()"
+                >
+                    🧠 Analyze Report
+                </button>
+
+
+                <div class="ai-initial-state">
+
+                    <div class="ai-state-icon">
+                        🔬
+                    </div>
+
+                    <h3>AI Analysis Ready</h3>
+
+                    <p>
+                        Upload a report and provide the doctor's
+                        diagnosis to begin AI-assisted analysis.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+     MEDICAL REPORT HISTORY
+========================== -->
+
+<section class="ai-report-section">
+
+    <h2>📋 Medical Report History</h2>
+
+    <p>
+        View previously analyzed medical reports for this patient.
+    </p>
+
+    <div
+        id="reportHistoryContainer"
+        style="
+            overflow-x:auto;
+            margin-top:20px;
+        "
+    >
+        <p style="color:#64748b;">
+            Search for a patient to view medical report history.
+        </p>
+    </div>
+
+</section>
+
+
+        <!-- =========================
+             ACCESS HISTORY
+        ========================== -->
+
+        <div class="card">
+
+            <div class="history-header">
+
+                <div>
+
+                    <div class="card-title">
+
+                        <div class="card-title-icon">
+                            📋
+                        </div>
+
+                        <h2>
+                            Access History
+                        </h2>
+
+                    </div>
+
+                    <p class="card-description">
+
+                        Records of patient information accessed
+                        by this hospital.
+
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="history-button"
+                    class="history-btn"
+                    onclick="loadAccessLogs()"
+                >
+                    View Access History
+                </button>
+
+            </div>
+
+
+            <div
+                id="logs-message"
+                class="message"
+            >
+            </div>
+
+
+            <div
+                id="logs-wrapper"
+                class="table-wrapper"
+            >
+
+                <table id="logs-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Date & Time
+                            </th>
+
+                            <th>
+                                EMIAS ID
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="logs-body">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer">
+
+            EMIAS — Emergency Medical Information & Assistance System
+
+        </div>
+
+
+    </main>
+
+
+    <script>
+
+
+        /* =========================
+           PATIENT SEARCH
+        ========================== */
+
+
+        async function searchPatient() {
+
+
+            const token =
+                localStorage.getItem(
+                    "hospital_token"
+                );
+
+
+            const emiasId =
+                document
+                    .getElementById("emias_id")
+                    .value
+                    .trim();
+
+
+            const patientCard =
+                document.getElementById(
+                    "patient-card"
+                );
+
+
+            const searchButton =
+                document.getElementById(
+                    "search-button"
+                );
+
+
+            if (!token) {
+
+                window.location.href =
+                    "/frontend/hospital.html";
+
+                return;
+
+            }
+
+
+            if (!emiasId) {
+
+                showMessage(
+                    "Please enter an EMIAS ID.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            patientCard.style.display =
+                "none";
+
+
+            searchButton.disabled = true;
+
+            searchButton.classList.add(
+                "loading"
+            );
+
+            searchButton.innerHTML =
+                '<span class="spinner"></span>Searching...';
+
+
+            try {
+
+
+                const response =
+                    await fetch(
+                        `/patients/${encodeURIComponent(emiasId)}`,
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "Authorization":
+                                    "Bearer " + token
+                            }
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    showMessage(
+                        data.detail ||
+                        "Unable to retrieve patient record.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                displayPatient(data);
+
+                loadReportHistory(emiasId);
+
+
+                showMessage(
+                    "Patient record retrieved successfully.",
+                    "success"
+                );
+
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+                showMessage(
+                    "Unable to connect to EMIAS server.",
+                    "error"
+                );
+
+            }
+
+            finally {
+
+                searchButton.disabled =
+                    false;
+
+                searchButton.classList.remove(
+                    "loading"
+                );
+
+                searchButton.innerHTML =
+                    "Search Patient";
+
+            }
+
+        }
+
+
+        /* =========================
+           ENTER KEY SEARCH
+        ========================== */
+
+
+        function handleSearchKey(event) {
+
+            if (event.key === "Enter") {
+
+                searchPatient();
+
+            }
+
+        }
+
+
+        /* =========================
+           DISPLAY PATIENT
+        ========================== */
+
+
+        function displayPatient(data) {
+
+
+            document.getElementById(
+                "patient-name"
+            ).innerText =
+                data.full_name ||
+                "Not available";
+
+
+
+            document.getElementById(
+                "reportPatientName"
+            ).innerText =
+                data.full_name || "Not available";
+
+            document.getElementById(
+                "reportPatientEmias"
+            ).innerText =
+                data.emias_id || "Not available";
+
+
+            document.getElementById(
+                "patient-emias-id"
+            ).innerText =
+                data.emias_id ||
+                "Not available";
+
+
+            document.getElementById("reportPatientName").innerText =
+                data.full_name || "Not available";
+
+            document.getElementById("reportPatientEmias").innerText =
+                data.emias_id || "Not available";
+
+
+            document.getElementById(
+                "date_of_birth"
+            ).innerText =
+                data.date_of_birth ||
+                "Not available";
+
+
+            document.getElementById(
+                "gender"
+            ).innerText =
+                data.gender ||
+                "Not available";
+
+
+            document.getElementById(
+                "blood_group"
+            ).innerText =
+                data.blood_group ||
+                "Not available";
+
+
+            document.getElementById(
+                "phone"
+            ).innerText =
+                data.phone ||
+                "Not available";
+
+
+            document.getElementById(
+                "allergies"
+            ).innerText =
+                data.allergies ||
+                "None";
+
+
+            document.getElementById(
+                "medical_conditions"
+            ).innerText =
+                data.medical_conditions ||
+                "None";
+
+
+            document.getElementById(
+                "medications"
+            ).innerText =
+                data.medications ||
+                "None";
+
+
+            document.getElementById(
+                "address"
+            ).innerText =
+                data.address ||
+                "Not available";
+
+
+            document.getElementById(
+                "emergency_contact_name"
+            ).innerText =
+                data.emergency_contact_name ||
+                "Not available";
+
+
+            document.getElementById(
+                "emergency_contact_phone"
+            ).innerText =
+                data.emergency_contact_phone ||
+                "Not available";
+
+
+            /* Patient avatar */
+
+            const name =
+                data.full_name ||
+                "Patient";
+
+
+            const initials =
+                name
+                    .split(" ")
+                    .map(word =>
+                        word.charAt(0)
+                    )
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase();
+
+
+            document.getElementById(
+                "patient-avatar"
+            ).innerText =
+                initials;
+
+
+            document.getElementById(
+                "patient-card"
+            ).style.display =
+                "block";
+
+
+            /* Highlight allergies */
+
+            const allergyField =
+                document.getElementById(
+                    "allergy-field"
+                );
+
+
+            if (
+                data.allergies &&
+                data.allergies.trim() !== ""
+            ) {
+
+                allergyField.classList.add(
+                    "danger"
+                );
+
+            }
+
+            else {
+
+                allergyField.classList.remove(
+                    "danger"
+                );
+
+            }
+
+
+            /* Highlight medical conditions */
+
+            const conditionField =
+                document.getElementById(
+                    "condition-field"
+                );
+
+
+            if (
+                data.medical_conditions &&
+                data.medical_conditions.trim() !== ""
+            ) {
+
+                conditionField.classList.add(
+                    "warning"
+                );
+
+            }
+
+            else {
+
+                conditionField.classList.remove(
+                    "warning"
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           MESSAGE
+        ========================== */
+
+
+        function showMessage(
+            text,
+            type
+        ) {
+
+
+            const message =
+                document.getElementById(
+                    "message"
+                );
+
+
+            message.innerText =
+                text;
+
+
+            message.className =
+                "message " + type;
+
+
+            message.style.display =
+                "block";
+
+
+        }
+
+
+
+
+        /* =========================
+   AI MEDICAL REPORT UPLOAD
+========================= */
+
+    async function analyzeMedicalReport() {
+    const token = localStorage.getItem("hospital_token");
+
+    const emiasIdElement =
+        document.getElementById("patient-emias-id");
+
+    const reportType =
+        document.getElementById("reportType").value;
+
+    const medicalReport =
+        document.getElementById("medicalReport").files[0];
+
+    const doctorDiagnosis =
+        document.getElementById("doctorDiagnosis").value.trim();
+
+    const analyzeButton =
+        document.querySelector(".analyze-btn");
+
+    const initialState =
+        document.querySelector(".ai-initial-state");
+
+    if (!token) {
+        window.location.href = "/frontend/hospital.html";
+        return;
+    }
+
+    const emiasId =
+        emiasIdElement
+            ? emiasIdElement.innerText.trim()
+            : "";
+
+    if (!emiasId || emiasId === "Not available") {
+        alert(
+            "Please search for a patient before analyzing a medical report."
+        );
+        return;
+    }
+
+    if (!reportType) {
+        alert("Please select a medical report type.");
+        return;
+    }
+
+    if (!medicalReport) {
+        alert("Please select a medical report file.");
+        return;
+    }
+
+    if (!doctorDiagnosis) {
+        alert("Please enter the doctor's diagnosis.");
+        return;
+    }
+
+    analyzeButton.disabled = true;
+    analyzeButton.innerHTML =
+        '<span class="spinner"></span> Analyzing...';
+
+    try {
+
+        const formData = new FormData();
+
+        formData.append(
+            "emias_id",
+            emiasId
+        );
+
+        formData.append(
+            "report_type",
+            reportType
+        );
+
+        formData.append(
+            "doctor_diagnosis",
+            doctorDiagnosis
+        );
+
+        formData.append(
+            "medical_report",
+            medicalReport
+        );
+
+        const response = await fetch(
+            "/ai/upload-report",
+            {
+                method: "POST",
+
+                headers: {
+                    "Authorization":
+                        "Bearer " + token
+                },
+
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (response.status === 401) {
+
+            localStorage.removeItem(
+                "hospital_token"
+            );
+
+            alert(
+                "Your session has expired. Please login again."
+            );
+
+            window.location.href =
+                "/frontend/hospital.html";
+
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data.detail ||
+                "Unable to analyze medical report."
+            );
+        }
+
+        const aiAnalysis =
+            data.ai_analysis;
+
+        let aiHTML = "";
+
+        if (
+            aiAnalysis &&
+            aiAnalysis.prediction
+        ) {
+
+            const prediction =
+                aiAnalysis.prediction;
+
+            const confidence =
+                aiAnalysis.confidence;
+
+            const doctor =
+                doctorDiagnosis;
+
+
+                        const gradcamFilename =
+                aiAnalysis.gradcam_filename;
+
+            const gradcamUrl =
+                gradcamFilename
+                    ? `/ai/gradcam/${encodeURIComponent(gradcamFilename)}`
+                    : null;
+
+            let gradcamDisplayUrl = null;
+
+            if (gradcamUrl) {
+                try {
+                    const gradcamResponse =
+                        await fetch(
+                            gradcamUrl,
+                            {
+                                headers: {
+                                    "Authorization":
+                                        `Bearer ${token}`
+                                }
+                            }
+                        );
+
+                    if (gradcamResponse.ok) {
+                        const gradcamBlob =
+                            await gradcamResponse.blob();
+
+                        gradcamDisplayUrl =
+                            URL.createObjectURL(
+                                gradcamBlob
+                            );
+                    }
+                } catch (error) {
+                    console.error(
+                        "Grad-CAM image loading error:",
+                        error
+                    );
+                }
+            }
+
+
+            
+            const analysisStatus = data.analysis_status || "Not Available";
+
+            const isMismatch = analysisStatus === "Mismatch";
+            const isConsistent = analysisStatus === "Consistent";
+
+ 
+            const gradcamHTML = gradcamUrl
+                ? `
+                <div style="margin-top:20px;">
+                    <h4 style="margin-bottom:10px;">
+                        🧠 AI Explanation — Grad-CAM
+                    </h4>
+
+                <img
+                    src="${gradcamDisplayUrl}"
+                    alt="Grad-CAM explanation of ECG analysis"
+                    style="
+                        width:100%;
+                        max-width:520px;
+                        display:block;
+                        margin:0 auto;
+                        border-radius:12px;
+                        border:1px solid #cbd5e1;
+                    "
+                >
+
+                <p style="
+                    font-size:12px;
+                    color:#64748b;
+                    margin-top:8px;
+                ">
+                    Highlighted regions indicate image areas that influenced
+                    the model's prediction. This visualization is for
+                    explanation support and does not establish a clinical diagnosis.
+                </p>
+            </div>
+    `
+            : "";
+
+            if (isMismatch) {
+
+                aiHTML = `
+                    <div class="ai-result-card"
+                         style="
+                         background:#fff7ed;
+                         border:1px solid #fdba74;
+                         border-radius:14px;
+                         padding:20px;
+                         margin-top:20px;
+                         ">
+
+                        <h3 style="margin-top:0;">
+                            🧠 AI Analysis
+                        </h3>
+
+                        <div style="
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:12px;
+    margin-top:15px;
+">
+
+    <div style="
+        background:white;
+        border:1px solid #fed7aa;
+        border-radius:10px;
+        padding:14px;
+    ">
+        <div style="
+            font-size:12px;
+            color:#64748b;
+            margin-bottom:6px;
+        ">
+            DOCTOR FINDING
+        </div>
+
+        <strong style="font-size:15px;">
+            ${doctor}
+        </strong>
+    </div>
+
+    <div style="
+        background:white;
+        border:1px solid #fed7aa;
+        border-radius:10px;
+        padding:14px;
+    ">
+        <div style="
+            font-size:12px;
+            color:#64748b;
+            margin-bottom:6px;
+        ">
+            AI FINDING
+        </div>
+
+        <strong style="font-size:15px;">
+            ${prediction}
+        </strong>
+    </div>
+
+    <div style="
+        background:white;
+        border:1px solid #fed7aa;
+        border-radius:10px;
+        padding:14px;
+    ">
+        <div style="
+            font-size:12px;
+            color:#64748b;
+            margin-bottom:6px;
+        ">
+            MODEL CONFIDENCE
+        </div>
+
+        <strong style="font-size:15px;">
+            ${confidence}%
+        </strong>
+    </div>
+
+</div>
+                        
+
+                        ${gradcamHTML}                        
+                        
+                        <div style="
+                            background:#ffedd5;
+                            border-radius:10px;
+                            padding:12px;
+                            margin-top:15px;
+                            ">
+                            ⚠️ <strong>
+                            AI–Doctor Mismatch Detected
+                            </strong>
+
+                            <p style="
+                                margin-bottom:0;
+                                margin-top:6px;
+                            ">
+                                Clinical review is recommended.
+                            </p>
+                        </div>
+
+                        <p style="
+                            font-size:13px;
+                            color:#64748b;
+                            margin-bottom:0;
+                            margin-top:15px;
+                            ">
+                            AI output is supportive and
+                            does not replace professional
+                            medical diagnosis.
+                        </p>
+
+                    </div>
+                `;
+
+            } else {
+
+                aiHTML = `
+                    <div class="ai-result-card"
+                         style="
+                         background:#ecfdf5;
+                         border:1px solid #86efac;
+                         border-radius:14px;
+                         padding:20px;
+                         margin-top:20px;
+                         ">
+
+                        <h3 style="margin-top:0;">
+                            🧠 AI Analysis
+                        </h3>
+
+                        <p>
+                            <strong>AI Prediction:</strong>
+                            ${prediction}
+                        </p>
+
+                        <p>
+                            <strong>Model Confidence:</strong>
+                            ${confidence}%
+                        </p>
+
+                        <p>
+                            <strong>Doctor Diagnosis:</strong>
+                            ${doctor}
+                        </p>
+
+
+                        ${gradcamHTML}                        
+
+                        <div style="
+                            background:#dcfce7;
+                            border-radius:10px;
+                            padding:12px;
+                            margin-top:15px;
+                            ">
+                            ✓ AI result is consistent
+                            with the entered diagnosis.
+                        </div>
+
+                        <p style="
+                            font-size:13px;
+                            color:#64748b;
+                            margin-bottom:0;
+                            margin-top:15px;
+                            ">
+                            AI output is supportive and
+                            does not replace professional
+                            medical diagnosis.
+                        </p>
+
+                    </div>
+                `;
+            }
+
+        } else {
+
+            aiHTML = `
+                <div style="
+                    background:#f8fafc;
+                    border:1px solid #cbd5e1;
+                    border-radius:14px;
+                    padding:20px;
+                    margin-top:20px;
+                ">
+                    <h3>📄 Report Uploaded</h3>
+
+                    <p>
+                        The report was uploaded successfully.
+                    </p>
+
+                    <p style="
+                        font-size:13px;
+                        color:#64748b;
+                    ">
+                        AI analysis is not currently
+                        available for this report type.
+                    </p>
+                </div>
+            `;
+        }
+
+        initialState.innerHTML = aiHTML;
+
+        initialState.style.background =
+            "transparent";
+
+        initialState.style.border =
+            "none";
+
+        document.getElementById(
+            "medicalReport"
+        ).value = "";
+
+    } catch (error) {
+
+        console.error(
+            "Medical report analysis error:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Unable to connect to EMIAS server."
+        );
+
+    } finally {
+
+        analyzeButton.disabled = false;
+
+        analyzeButton.innerHTML =
+            "🧠 Analyze Report";
+    }
+}
+
+
+        
+
+
+        /* =========================
+           ACCESS HISTORY
+        ========================== */
+
+
+        async function loadAccessLogs() {
+
+
+            const token =
+                localStorage.getItem(
+                    "hospital_token"
+                );
+
+
+            const tableWrapper =
+                document.getElementById(
+                    "logs-wrapper"
+                );
+
+
+            const tableBody =
+                document.getElementById(
+                    "logs-body"
+                );
+
+
+            const message =
+                document.getElementById(
+                    "logs-message"
+                );
+
+
+            const button =
+                document.getElementById(
+                    "history-button"
+                );
+
+
+            if (!token) {
+
+                window.location.href =
+                    "/frontend/hospital.html";
+
+                return;
+
+            }
+
+
+            button.disabled = true;
+
+            button.classList.add(
+                "loading"
+            );
+
+            button.innerHTML =
+                '<span class="spinner"></span>Loading...';
+
+
+            try {
+
+
+                const response =
+                    await fetch(
+                        "/hospital/access-logs",
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "Authorization":
+                                    "Bearer " + token
+                            }
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    message.innerText =
+                        data.detail ||
+                        "Unable to load access history.";
+
+
+                    message.className =
+                        "message error";
+
+
+                    message.style.display =
+                        "block";
+
+
+                    return;
+
+                }
+
+
+                tableBody.innerHTML =
+                    "";
+
+
+                if (
+                    data.length === 0
+                ) {
+
+                    message.innerText =
+                        "No access history found.";
+
+
+                    message.className =
+                        "message";
+
+
+                    message.style.display =
+                        "block";
+
+
+                    tableWrapper.style.display =
+                        "none";
+
+
+                    return;
+
+                }
+
+
+                data.forEach(
+                    log => {
+
+
+                        const row =
+                            document.createElement(
+                                "tr"
+                            );
+
+
+                        row.innerHTML = `
+
+                            <td>
+
+                                ${new Date(
+                                    log.access_time
+                                ).toLocaleString()}
+
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    ${log.emias_id}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="action-badge">
+
+                                    ${log.action}
+
+                                </span>
+
+                            </td>
+
+                        `;
+
+
+                        tableBody.appendChild(
+                            row
+                        );
+
+
+                    }
+                );
+
+
+                tableWrapper.style.display =
+                    "block";
+
+
+                message.style.display =
+                    "none";
+
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+
+                message.innerText =
+                    "Unable to connect to EMIAS server.";
+
+
+                message.className =
+                    "message error";
+
+
+                message.style.display =
+                    "block";
+
+            }
+
+            finally {
+
+                button.disabled =
+                    false;
+
+
+                button.classList.remove(
+                    "loading"
+                );
+
+
+                button.innerHTML =
+                    "View Access History";
+
+            }
+
+        }
+
+
+
+        // =========================
+// MEDICAL REPORT HISTORY
+// =========================
+
+async function loadReportHistory(emiasId) {
+
+    const container = document.getElementById(
+        "reportHistoryContainer"
+    );
+
+    if (!container) {
+        return;
+    }
+
+    const token = localStorage.getItem("hospital_token");
+
+    if (!token) {
+        container.innerHTML = `
+            <p style="color:#dc2626;">
+                Hospital authentication required.
+            </p>
+        `;
+        return;
+    }
+
+    if (!emiasId) {
+        container.innerHTML = `
+            <p style="color:#64748b;">
+                Search for a patient to view medical report history.
+            </p>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <p style="color:#64748b;">
+            Loading report history...
+        </p>
+    `;
+
+    try {
+
+        const response = await fetch(
+            `/ai/report-history/${encodeURIComponent(emiasId)}`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.detail || "Failed to load report history."
+            );
+        }
+
+        if (!data.reports || data.reports.length === 0) {
+
+            container.innerHTML = `
+                <div style="
+                    padding:20px;
+                    background:#f8fafc;
+                    border-radius:10px;
+                    text-align:center;
+                    color:#64748b;
+                ">
+                    No medical reports found for this patient.
+                </div>
+            `;
+
+            return;
+        }
+
+        let tableHTML = `
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                background:white;
+                border-radius:10px;
+                overflow:hidden;
+            ">
+
+                <thead>
+                    <tr style="
+                        background:#f1f5f9;
+                        text-align:left;
+                    ">
+                        <th style="padding:12px;">
+                            Report Type
+                        </th>
+
+                        <th style="padding:12px;">
+                            Doctor Diagnosis
+                        </th>
+
+                        <th style="padding:12px;">
+                            AI Prediction
+                        </th>
+
+                        <th style="padding:12px;">
+                            Confidence
+                        </th>
+
+                        <th style="padding:12px;">
+                            Status
+                        </th>
+
+                        <th style="padding:12px;">
+                            Uploaded At
+                        </th>
+
+                        <th style="padding:12px;">
+                            Explanation
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+        `;
+
+        data.reports.forEach(report => {
+
+            let statusColor = "#64748b";
+            let statusIcon = "⚪";
+
+
+            if (report.analysis_status === "Consistent") {
+                statusColor = "#16a34a";
+                statusIcon = "🟢";
+            }
+
+            if (report.analysis_status === "Mismatch") {
+                statusColor = "#dc2626";
+                statusIcon = "🔴";
+            }
+
+            tableHTML += `
+                <tr style="
+                    border-bottom:1px solid #e2e8f0;
+                ">
+
+                    <td style="padding:12px;">
+                        ${report.report_type || "-"}
+                    </td>
+
+                    <td style="padding:12px;">
+                        ${report.doctor_diagnosis || "-"}
+                    </td>
+
+                    <td style="padding:12px;">
+                        ${report.ai_prediction || "Not Available"}
+                    </td>
+
+                    <td style="padding:12px;">
+                        ${
+                            report.ai_confidence
+                            ? report.ai_confidence + "%"
+                            : "Not Available"
+                        }
+                        
+                        ${
+                            report.ai_confidence
+                            ? `<div style="
+                            font-size:11px;
+                            color:#64748b;
+                            margin-top:3px;
+                        ">
+                            Model confidence
+                        </div>`
+                        : ""
+                    }
+
+                    </td>
+
+                    <td style="               
+                    padding:12px;
+                        font-weight:600;
+                        color:${statusColor};
+                    ">
+                        ${statusIcon} ${report.analysis_status || "-"}
+                    </td>
+
+                    <td style="padding:12px;">
+                        ${
+                            report.uploaded_at
+                                ? new Date(
+                                    report.uploaded_at.endsWith("Z")
+                                        ? report.uploaded_at
+                                        : report.uploaded_at + "Z"
+                                ).toLocaleString(
+                                    "en-IN",
+                                    {
+                                        timeZone: "Asia/Kolkata"
+                                    }
+                                )
+                                : "-"
+                        }
+                    </td>
+
+                    </td>
+
+                                        <td style="padding:12px;">
+                        ${
+                            report.report_type === "ECG"
+                                ? `
+                                    <button
+                                        type="button"
+                                        onclick="viewGradCAM('${encodeURIComponent(report.filename)}')"
+                                        style="
+                                            padding:8px 12px;
+                                            border:none;
+                                            border-radius:8px;
+                                            background:#eff6ff;
+                                            color:#2563eb;
+                                            cursor:pointer;
+                                            font-weight:600;
+                                        "
+                                    >
+                                        🧠 View Grad-CAM
+                                    </button>
+                                `
+                                : `
+                                    <span style="color:#94a3b8;">
+                                        —
+                                    </span>
+                                `
+                        }
+                    </td>
+
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                </tbody>
+            </table>
+        `;
+
+        container.innerHTML = tableHTML;
+
+    } catch (error) {
+
+        console.error(
+            "Report history error:",
+            error
+        );
+
+        container.innerHTML = `
+            <div style="
+                padding:20px;
+                background:#fef2f2;
+                color:#dc2626;
+                border-radius:10px;
+            ">
+                Failed to load medical report history.
+                <br>
+                <small>
+                    ${error.message}
+                </small>
+            </div>
+        `;
+    }
+}
+
+
+        /* =========================
+           LOGOUT
+        ========================== */
+
+
+        function logout() {
+
+
+            localStorage.removeItem(
+                "hospital_token"
+            );
+
+
+            window.location.href =
+                "/frontend/hospital.html";
+
+        }
+
+
+
+
+
+
+
+        async function viewGradCAM(encodedFilename) {
+
+    const token = localStorage.getItem("hospital_token");
+
+    if (!token) {
+        alert("Hospital authentication required.");
+        return;
+    }
+ 
+    const filename = decodeURIComponent(encodedFilename);
+
+    const gradcamFilename =
+        filename.endsWith("_gradcam.png")
+            ? filename
+            : `${filename.replace(/\.[^/.]+$/, "")}_gradcam.png`;
+
+    try {
+
+        const response = await fetch(
+            `/ai/gradcam/${encodeURIComponent(gradcamFilename)}`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!response.ok) {
+
+            const data =
+                await response.json().catch(() => ({}));
+
+            throw new Error(
+                data.detail ||
+                "Unable to load Grad-CAM image."
+            );
+        }
+
+        const blob = await response.blob();
+
+        const imageUrl =
+            URL.createObjectURL(blob);
+
+        const modal =
+            document.createElement("div");
+
+        modal.setAttribute(
+            "data-gradcam-modal",
+            "true"
+        );
+
+        modal.style.cssText = `
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        `;
+
+        modal.innerHTML = `
+            <div style="
+                background:white;
+                width:100%;
+                max-width:700px;
+                max-height:90vh;
+                overflow:auto;
+                border-radius:16px;
+                padding:24px;
+                position:relative;
+                box-shadow:0 20px 50px rgba(0,0,0,0.25);
+            ">
+
+                <button
+                    type="button"
+                    id="closeGradCAM"
+                    style="
+                        position:absolute;
+                        top:12px;
+                        right:15px;
+                        border:none;
+                        background:#f1f5f9;
+                        width:36px;
+                        height:36px;
+                        border-radius:50%;
+                        font-size:22px;
+                        cursor:pointer;
+                    "
+                >
+                    ×
+                </button>
+
+                <h3 style="
+                    margin:0 0 18px 0;
+                    color:#1e293b;
+                ">
+                    🧠 AI Explanation — Grad-CAM
+                </h3>
+
+                <img
+                    src="${imageUrl}"
+                    alt="Grad-CAM explanation"
+                    style="
+                        width:100%;
+                        display:block;
+                        border-radius:12px;
+                        border:1px solid #cbd5e1;
+                    "
+                >
+
+                <p style="
+                    margin-top:14px;
+                    font-size:13px;
+                    line-height:1.6;
+                    color:#64748b;
+                ">
+                    Highlighted regions indicate image areas
+                    that influenced the AI model's prediction.
+                    This visualization is provided for explanation
+                    support and does not establish a clinical diagnosis.
+                </p>
+
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document
+            .getElementById("closeGradCAM")
+            .addEventListener("click", () => {
+
+                URL.revokeObjectURL(imageUrl);
+
+                modal.remove();
+            });
+
+        modal.addEventListener("click", (event) => {
+
+            if (event.target === modal) {
+
+                URL.revokeObjectURL(imageUrl);
+
+                modal.remove();
+            }
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Grad-CAM loading error:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Unable to load Grad-CAM image."
+        );
+    }
+}
+
+
+    </script>
+
+
+</body>
+
+</html>

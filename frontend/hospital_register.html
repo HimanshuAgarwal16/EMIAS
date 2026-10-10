@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMIAS - Hospital Registration</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{min-height:100vh;display:flex;justify-content:center;align-items:center;padding:28px 18px;background:radial-gradient(circle at 20% 10%,#16366b 0,transparent 34%),radial-gradient(circle at 85% 80%,#24145b 0,transparent 35%),#071326;color:#eef7ff}
+.page{width:100%;max-width:560px}.brand{text-align:center;margin-bottom:24px}.brand-mark{width:58px;height:58px;margin:0 auto 10px;border:1px solid rgba(91,216,255,.3);border-radius:18px;background:rgba(91,216,255,.08);display:grid;place-items:center}.brand-mark svg{width:43px;height:43px}.eyebrow{font-size:11px;letter-spacing:.14em;color:#7fa7c7}.brand h1{font-size:30px;letter-spacing:.04em;margin-top:6px}.brand p{font-size:13px;color:#9fb3c9;margin-top:6px}.card{background:rgba(12,28,51,.88);border:1px solid rgba(123,157,255,.2);border-radius:22px;padding:32px;box-shadow:0 24px 70px rgba(0,0,0,.32);backdrop-filter:blur(14px)}h2{text-align:center;font-size:25px;margin-bottom:8px}.subtitle{text-align:center;color:#9fb3c9;font-size:14px;margin-bottom:26px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.form-group{margin-bottom:16px}.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:700;color:#cfe0ef;margin-bottom:7px}input{width:100%;padding:13px 14px;border-radius:10px;border:1px solid #2a4666;background:#091a30;color:#f5fbff;font-size:14px;outline:none}input:focus{border-color:#5bd8ff;box-shadow:0 0 0 3px rgba(91,216,255,.1)}.btn{width:100%;border:0;border-radius:11px;padding:14px;background:linear-gradient(135deg,#2ab8ee,#536ff5);color:white;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}.btn:hover{filter:brightness(1.08)}.message{display:none;margin-top:15px;padding:12px;border-radius:10px;font-size:13px}.error{display:block;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#ffb4b4}.success{display:block;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#a9f0bd}.links{text-align:center;margin-top:20px;font-size:13px;color:#91a8bd}.links a{color:#70dfff;text-decoration:none}.links a:hover{text-decoration:underline}.security{text-align:center;color:#71879b;font-size:11px;margin-top:16px}@media(max-width:600px){.card{padding:24px 18px}.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 34h11l5-14 9 28 7-19 5 5h11" stroke="#5bd8ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 7v10M27 12h10" stroke="#7b9dff" stroke-width="3" stroke-linecap="round"/></svg></div>
+    <div class="eyebrow">SECURE HEALTHCARE ACCESS</div><h1>EMIAS</h1><p>Emergency Medical Information &amp; Assistance System</p>
+  </div>
+  <div class="card">
+    <h2>Register Hospital</h2><p class="subtitle">Create an authorized hospital account for EMIAS.</p>
+    <form onsubmit="registerHospital(event)">
+      <div class="grid">
+        <div class="form-group full"><label for="hospital_name">Hospital Name</label><input id="hospital_name" type="text" placeholder="Enter hospital name" required></div>
+        <div class="form-group"><label for="registration_number">Registration Number</label><input id="registration_number" type="text" placeholder="Hospital registration no." required></div>
+        <div class="form-group"><label for="email">Hospital Email</label><input id="email" type="email" placeholder="Hospital email" required></div>
+        <div class="form-group"><label for="password">Password</label><input id="password" type="password" placeholder="Create password" minlength="6" required></div>
+        <div class="form-group"><label for="confirm_password">Confirm Password</label><input id="confirm_password" type="password" placeholder="Confirm password" minlength="6" required></div>
+        <div class="form-group full"><button class="btn" type="submit">Create Hospital Account</button></div>
+      </div>
+    </form>
+    <div id="message" class="message"></div>
+    <div class="links">Already registered? <a href="/frontend/hospital.html">Back to Hospital Login</a></div>
+  </div>
+  <div class="security">Authorized hospital access only</div>
+</div>
+<script>
+async function registerHospital(event){
+ event.preventDefault();
+ const message=document.getElementById('message');
+ const password=document.getElementById('password').value;
+ const confirm=document.getElementById('confirm_password').value;
+ if(password!==confirm){message.innerText='Passwords do not match.';message.className='message error';return;}
+ const payload={hospital_name:document.getElementById('hospital_name').value.trim(),registration_number:document.getElementById('registration_number').value.trim(),email:document.getElementById('email').value.trim(),password};
+ try{
+  const response=await fetch('/auth/hospital/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const data=await response.json();
+  if(!response.ok){message.innerText=data.detail||'Unable to register hospital.';message.className='message error';return;}
+  message.innerText='Hospital registered successfully. Redirecting to login...';message.className='message success';
+  setTimeout(()=>window.location.href='/frontend/hospital.html',900);
+ }catch(error){console.error(error);message.innerText='Unable to connect to EMIAS server.';message.className='message error';}
+}
+</script>
+</body>
+</html>

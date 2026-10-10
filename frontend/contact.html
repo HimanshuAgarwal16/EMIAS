@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact | EMIAS</title>
+<style>
+:root{--bg:#061322;--bg2:#0a1d31;--card:#f8fbff;--cyan:#39d9ff;--blue:#348cff;--text:#eef7ff;--muted:#9eb2c6;--dark:#101827;--darkmuted:#60728b;--line:rgba(255,255,255,.09)}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 80% 8%,rgba(57,217,255,.12),transparent 30%),radial-gradient(circle at 10% 40%,rgba(52,140,255,.10),transparent 28%),linear-gradient(135deg,var(--bg),var(--bg2));min-height:100vh}a{text-decoration:none;color:inherit}
+.navbar{height:76px;padding:0 6%;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;background:rgba(3,13,25,.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px}.brand-mark{font-size:31px;color:var(--cyan);filter:drop-shadow(0 0 8px rgba(57,217,255,.5))}.brand strong{font-size:21px;letter-spacing:1px}.brand small{display:block;color:#728ba2;font-size:9px;margin-top:2px}.nav{display:flex;gap:28px;color:#b6c5d4;font-size:13px}.nav a{transition:.2s}.nav a:hover,.nav .active{color:var(--cyan)}
+main{max-width:1200px;margin:auto;padding:80px 6% 95px}.contact-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:55px;align-items:center;min-height:600px}.intro .mini{color:#55ddf8;font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase}.intro h1{font-size:clamp(42px,5vw,64px);line-height:1.05;letter-spacing:-2px;margin:14px 0 18px}.intro h1 span{color:var(--cyan)}.intro p{color:var(--muted);max-width:500px;font-size:15px;line-height:1.8}.contact-card{background:var(--card);color:var(--dark);border:1px solid #d8e4f0;border-radius:16px;padding:34px 30px;box-shadow:0 20px 45px rgba(0,0,0,.25)}.contact-card h2{font-size:28px;margin-bottom:27px}.contact-item{display:grid;grid-template-columns:62px 1fr;gap:18px;align-items:center;margin:27px 0}.contact-icon{width:62px;height:62px;border-radius:50%;background:#e5f3fd;color:#0788e8;display:grid;place-items:center;font-size:27px;border:1px solid #d7ebfa}.contact-item h3{font-size:21px;margin-bottom:3px}.contact-item p{color:var(--darkmuted);font-size:15px;line-height:1.55}.contact-item .value{color:#0788e8;font-size:17px;margin-top:2px}.office{align-items:start}.footer{padding:25px 6%;display:flex;justify-content:space-between;border-top:1px solid var(--line);color:#70879d;font-size:10px;background:rgba(2,9,17,.7)}
+@media(max-width:850px){.contact-layout{grid-template-columns:1fr;gap:35px}.intro{text-align:center}.intro p{margin:auto}.contact-card{max-width:620px;margin:auto}}@media(max-width:600px){.navbar{padding:0 5%}.nav{gap:15px}.nav a{font-size:12px}.main{padding:55px 5%}.contact-layout{min-height:auto}.contact-card{padding:27px 22px}.contact-item{grid-template-columns:52px 1fr;gap:14px}.contact-icon{width:52px;height:52px}.footer{flex-direction:column;gap:8px;text-align:center}}
+</style>
+</head>
+<body>
+<header class="navbar"><a class="brand" href="/"><div class="brand-mark">⌁</div><div><strong>EMIAS</strong><small>Emergency Medical Information &amp; Assistance System</small></div></a><nav class="nav"><a href="/">Home</a><a href="/frontend/about.html">About</a><a class="active" href="/frontend/contact.html">Contact</a></nav></header>
+<main>
+<section class="contact-layout">
+<div class="intro"><div class="mini">GET IN TOUCH</div><h1>We'd love to <span>hear from you.</span></h1><p>For project information, support, feedback, demonstrations or academic discussions, please feel free to reach out to the EMIAS team.</p></div>
+<div class="contact-card">
+<h2>Contact Information</h2>
+<div class="contact-item"><div class="contact-icon">✉</div><div><h3>Email Us</h3><p>For general inquiries and feedback.</p><p class="value">emias@gmail.com</p></div></div>
+<div class="contact-item"><div class="contact-icon">⌕</div><div><h3>Customer Care</h3><p>Our support team is available 24/7.</p><p class="value">+91 9718777807</p></div></div>
+<div class="contact-item office"><div class="contact-icon">⌖</div><div><h3>Our Office</h3><p>ABESIT Institute of Technology,<br>Ghaziabad, Uttar Pradesh, 201009</p></div></div>
+</div>
+</section>
+</main>
+<footer class="footer"><span>EMIAS — Emergency Medical Information &amp; Assistance System</span><span>Secure • Connected • AI-Assisted</span></footer>
+</body>
+</html>

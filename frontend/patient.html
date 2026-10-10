@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMIAS — Patient Portal</title>
+<style>
+:root{
+  --bg:#061525;--bg2:#0a1d31;--panel:#0d2237;--panel2:#102a43;
+  --line:rgba(117,190,230,.18);--cyan:#38d8ff;--blue:#4d8dff;
+  --text:#eef7ff;--muted:#9bb0c5;--success:#48e0a4;--danger:#ff6f7d;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at 80% 0%,rgba(42,128,190,.16),transparent 35%),linear-gradient(135deg,var(--bg),#081a2b 55%,#071321);color:var(--text);min-height:100vh}
+a{text-decoration:none;color:inherit}
+.header{height:78px;border-bottom:1px solid var(--line);background:rgba(5,18,31,.82);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:36px;height:36px;border:1px solid rgba(56,216,255,.4);border-radius:10px;display:grid;place-items:center;color:var(--cyan);font-size:23px}.brand strong{font-size:22px;letter-spacing:1px}.brand small{display:block;color:#7f98af;font-size:9px;letter-spacing:1.5px;margin-top:2px}
+.header-actions{display:flex;align-items:center;gap:18px}.home-link{color:#b9cde0;font-size:14px}.home-link:hover{color:var(--cyan)}
+.container{width:min(1120px,90%);margin:46px auto 70px}
+.hero{margin-bottom:28px}.eyebrow{font-size:11px;letter-spacing:3px;color:var(--cyan);font-weight:800;margin-bottom:12px}.hero h1{font-size:clamp(30px,4vw,48px);line-height:1.08;margin-bottom:12px}.hero h1 span{color:var(--cyan)}.hero p{max-width:760px;color:var(--muted);line-height:1.7}
+.auth-shell{display:block;max-width:760px;margin:0 auto}.panel{background:linear-gradient(145deg,rgba(16,42,67,.9),rgba(8,27,45,.94));border:1px solid var(--line);border-radius:22px;padding:30px;box-shadow:0 18px 55px rgba(0,0,0,.18)}
+.tabs{display:flex;gap:6px;background:#071a2c;border:1px solid var(--line);padding:5px;border-radius:12px;margin-bottom:25px}.tab{flex:1;border:0;background:transparent;color:#8fa6ba;padding:12px;border-radius:9px;font-weight:700;cursor:pointer}.tab.active{background:linear-gradient(90deg,#168dcc,#3c8cff);color:white}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-size:13px;color:#c4d5e5;font-weight:650}input,select,textarea{width:100%;background:#071a2b;border:1px solid #24445e;color:#edf7ff;border-radius:10px;padding:12px 13px;font-size:14px;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(56,216,255,.08)}textarea{min-height:82px;resize:vertical}.btn{width:100%;border:0;border-radius:11px;padding:13px 16px;background:linear-gradient(90deg,#168dcc,#3c8cff);color:white;font-weight:800;cursor:pointer;margin-top:20px}.btn:hover{filter:brightness(1.08)}.secondary{background:#102a43;border:1px solid #31536c}.message{display:none;margin-top:15px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5}.message.success{display:block;background:rgba(72,224,164,.08);border:1px solid rgba(72,224,164,.3);color:#8ff2c7}.message.error{display:block;background:rgba(255,111,125,.08);border:1px solid rgba(255,111,125,.3);color:#ffadb5}
+.dashboard{display:none}.dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:22px}.dashboard-head h2{font-size:28px}.dashboard-head p{color:var(--muted);margin-top:5px}.logout{width:auto;margin:0;background:transparent;border:1px solid #31536c;padding:10px 17px}.identity{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;margin-bottom:18px}.identity-card{background:linear-gradient(135deg,#0d3550,#0b2137);border:1px solid rgba(56,216,255,.25);border-radius:20px;padding:25px}.identity-card .label{color:#7fa2bb;font-size:11px;letter-spacing:2px}.identity-card .id{font-size:30px;color:var(--cyan);font-weight:850;letter-spacing:2px;margin:8px 0}.secure{display:flex;align-items:center;justify-content:center;text-align:center;border:1px solid rgba(72,224,164,.22);background:rgba(72,224,164,.06);border-radius:20px;color:#8ff2c7;font-weight:750}.section-title{font-size:13px;letter-spacing:1.5px;color:var(--cyan);margin-bottom:14px}.record-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.record{background:#091c2e;border:1px solid var(--line);border-radius:13px;padding:15px}.record.full{grid-column:1/-1}.record label{display:block;color:#718da5;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.record strong{font-size:14px;line-height:1.5;word-break:break-word}.record.alert{border-color:rgba(255,111,125,.3)}.record.warning{border-color:rgba(255,196,90,.28)}
+.security-note{margin-top:18px;padding:11px 14px;border:1px solid rgba(72,224,164,.2);background:rgba(72,224,164,.05);border-radius:10px;color:#9bc8b6;font-size:12px;line-height:1.5}.security-note span{margin-right:5px}.id-result{display:none;margin-top:16px;padding:18px;border-radius:14px;border:1px solid rgba(56,216,255,.3);background:rgba(56,216,255,.06)}.id-result small{color:#89a7bd}.id-result strong{display:block;color:var(--cyan);font-size:24px;letter-spacing:2px;margin:6px 0 12px}
+.footer{text-align:center;color:#718ba0;border-top:1px solid var(--line);padding:24px;font-size:12px}
+@media(max-width:850px){.identity{grid-template-columns:1fr}}@media(max-width:620px){.header{padding:0 4%}.brand small{display:none}.container{width:92%;margin-top:30px}.panel{padding:21px}.form-grid,.record-grid{grid-template-columns:1fr}.field.full,.record.full{grid-column:auto}.dashboard-head{align-items:flex-start;flex-direction:column}.logout{width:100%}}
+</style>
+</head>
+<body>
+<header class="header">
+  <a class="brand" href="/">
+    <div class="brand-mark">⌁</div>
+    <div><strong>EMIAS</strong><small>EMERGENCY MEDICAL INFORMATION &amp; ASSISTANCE SYSTEM</small></div>
+  </a>
+  <div class="header-actions"><a class="home-link" href="/">← Home</a></div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div class="eyebrow">PATIENT PORTAL</div>
+    <h1>Your medical identity, <span>securely connected.</span></h1>
+    <p>Sign in to your secure patient account or create a new account to receive your unique EMIAS ID.</p>
+  </section>
+
+  <section id="authView" class="auth-shell">
+    <div class="panel">
+      <div class="tabs"><button id="loginTab" class="tab active" onclick="showAuth('login')">Patient Login</button><button id="registerTab" class="tab" onclick="showAuth('register')">Create Account</button></div>
+
+      <div id="loginForm">
+        <div class="field"><label for="loginEmiasId">EMIAS ID</label><input id="loginEmiasId" type="text" placeholder="e.g. EMIAS-583970B2" autocomplete="username"></div>
+        <div class="field" style="margin-top:15px"><label for="loginPassword">Password</label><input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password"></div>
+        <button class="btn" onclick="loginPatient()">Securely Sign In</button>
+        <div id="loginMessage" class="message"></div>
+      </div>
+
+      <div id="registerForm" style="display:none">
+        <div class="form-grid">
+          <div class="field"><label>Full Name *</label><input id="full_name" placeholder="Enter full name"></div>
+          <div class="field"><label>Date of Birth *</label><input id="date_of_birth" type="date"></div>
+          <div class="field"><label>Gender *</label><select id="gender"><option value="">Select gender</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+          <div class="field"><label>Blood Group</label><select id="blood_group"><option value="">Select blood group</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+          <div class="field"><label>Phone Number</label><input id="phone" type="tel" placeholder="Enter phone number"></div>
+          <div class="field"><label>Password *</label><input id="password" type="password" placeholder="Create a password" autocomplete="new-password"></div>
+          <div class="field"><label>Emergency Contact Name</label><input id="emergency_contact_name" placeholder="Contact name"></div>
+          <div class="field"><label>Emergency Contact Phone</label><input id="emergency_contact_phone" type="tel" placeholder="Contact phone"></div>
+          <div class="field full"><label>Address</label><textarea id="address" placeholder="Enter complete address"></textarea></div>
+          <div class="field full"><label>Allergies</label><textarea id="allergies" placeholder="e.g. Penicillin, food allergies"></textarea></div>
+          <div class="field full"><label>Medical Conditions</label><textarea id="medical_conditions" placeholder="e.g. Diabetes, asthma, hypertension"></textarea></div>
+          <div class="field full"><label>Current Medications</label><textarea id="medications" placeholder="Enter current medications"></textarea></div>
+        </div>
+        <button class="btn" onclick="registerPatient()">Register &amp; Generate EMIAS ID</button>
+        <div id="registerMessage" class="message"></div>
+        <div id="idResult" class="id-result"><small>Your unique EMIAS ID</small><strong id="generatedId"></strong><button class="btn secondary" onclick="switchToLogin()">Continue to Patient Login</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dashboard" class="dashboard">
+    <div class="dashboard-head"><div><div class="eyebrow">MY EMIAS</div><h2>Patient Medical Profile</h2><p>Your authenticated emergency medical information.</p></div><button class="btn logout" onclick="logoutPatient()">Sign Out</button></div>
+    <div class="identity">
+      <div class="identity-card"><div class="label">EMERGENCY MEDICAL ID</div><div id="dashEmiasId" class="id">—</div><div id="dashName" style="color:#c8d9e8">—</div></div>
+      <div class="secure">✓<br>Authenticated<br>Patient Record</div>
+    </div>
+    <div class="panel">
+      <div class="section-title">PERSONAL INFORMATION</div>
+      <div class="record-grid">
+        <div class="record"><label>Date of Birth</label><strong id="dashDob">—</strong></div><div class="record"><label>Gender</label><strong id="dashGender">—</strong></div><div class="record"><label>Blood Group</label><strong id="dashBlood">—</strong></div><div class="record"><label>Phone</label><strong id="dashPhone">—</strong></div>
+        <div id="dashAllergyBox" class="record full"><label>Allergies</label><strong id="dashAllergies">—</strong></div>
+        <div id="dashConditionBox" class="record full"><label>Medical Conditions</label><strong id="dashConditions">—</strong></div>
+        <div class="record full"><label>Current Medications</label><strong id="dashMedications">—</strong></div>
+        <div class="record full"><label>Address</label><strong id="dashAddress">—</strong></div>
+      </div>
+      <div class="section-title" style="margin-top:28px">EMERGENCY CONTACT</div>
+      <div class="record-grid"><div class="record"><label>Contact Name</label><strong id="dashEmergencyName">—</strong></div><div class="record"><label>Contact Phone</label><strong id="dashEmergencyPhone">—</strong></div></div>
+      <div id="dashboardMessage" class="message"></div>
+    </div>
+  </section>
+</main>
+<footer class="footer">EMIAS — Emergency Medical Information &amp; Assistance System • Secure • Connected • AI-Assisted</footer>
+
+<script>
+function showAuth(mode){
+  const login=mode==='login';
+  document.getElementById('loginForm').style.display=login?'block':'none';
+  document.getElementById('registerForm').style.display=login?'none':'block';
+  document.getElementById('loginTab').classList.toggle('active',login);
+  document.getElementById('registerTab').classList.toggle('active',!login);
+}
+function switchToLogin(){
+  showAuth('login');
+  const id=document.getElementById('generatedId').innerText;
+  document.getElementById('loginEmiasId').value=id;
+  document.getElementById('loginPassword').focus();
+}
+function setMessage(id,text,type){const el=document.getElementById(id);el.className='message '+type;el.innerText=text;}
+async function registerPatient(){
+  const data={
+    full_name:document.getElementById('full_name').value.trim(),
+    date_of_birth:document.getElementById('date_of_birth').value,
+    gender:document.getElementById('gender').value,
+    blood_group:document.getElementById('blood_group').value,
+    phone:document.getElementById('phone').value.trim(),
+    password:document.getElementById('password').value,
+    address:document.getElementById('address').value.trim(),
+    allergies:document.getElementById('allergies').value.trim(),
+    medical_conditions:document.getElementById('medical_conditions').value.trim(),
+    medications:document.getElementById('medications').value.trim(),
+    emergency_contact_name:document.getElementById('emergency_contact_name').value.trim(),
+    emergency_contact_phone:document.getElementById('emergency_contact_phone').value.trim()
+  };
+  if(!data.full_name||!data.date_of_birth||!data.gender||!data.password){setMessage('registerMessage','Please fill in Full Name, Date of Birth, Gender and Password.','error');return;}
+  try{
+    const res=await fetch('/patients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const out=await res.json();
+    if(!res.ok){setMessage('registerMessage',out.detail||'Patient registration failed.','error');return;}
+    setMessage('registerMessage','Registration completed successfully. Your EMIAS ID has been generated.','success');
+    document.getElementById('generatedId').innerText=out.emias_id;
+    document.getElementById('idResult').style.display='block';
+  }catch(e){setMessage('registerMessage','Unable to connect to EMIAS server.','error');}
+}
+async function loginPatient(){
+  const emiasId=document.getElementById('loginEmiasId').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  if(!emiasId||!password){setMessage('loginMessage','Please enter your EMIAS ID and password.','error');return;}
+  const form=new FormData();form.append('emias_id',emiasId);form.append('password',password);
+  try{
+    const res=await fetch('/auth/patient/login',{method:'POST',body:form});
+    const out=await res.json();
+    if(!res.ok){setMessage('loginMessage',out.detail||'Login failed.','error');return;}
+    localStorage.setItem('patient_token',out.access_token);
+    localStorage.setItem('patient_emias_id',out.emias_id||emiasId);
+    await loadPatientProfile();
+  }catch(e){setMessage('loginMessage','Unable to connect to EMIAS server.','error');}
+}
+async function loadPatientProfile(){
+  const token=localStorage.getItem('patient_token');
+  if(!token)return;
+  try{
+    const res=await fetch('/patients/me',{headers:{'Authorization':'Bearer '+token}});
+    const out=await res.json();
+    if(!res.ok){logoutPatient();return;}
+    document.getElementById('dashEmiasId').innerText=out.emias_id||'—';
+    document.getElementById('dashName').innerText=out.full_name||'—';
+    document.getElementById('dashDob').innerText=out.date_of_birth||'Not available';
+    document.getElementById('dashGender').innerText=out.gender||'Not available';
+    document.getElementById('dashBlood').innerText=out.blood_group||'Not provided';
+    document.getElementById('dashPhone').innerText=out.phone||'Not provided';
+    document.getElementById('dashAllergies').innerText=out.allergies||'None reported';
+    document.getElementById('dashConditions').innerText=out.medical_conditions||'None reported';
+    document.getElementById('dashMedications').innerText=out.medications||'None reported';
+    document.getElementById('dashAddress').innerText=out.address||'Not provided';
+    document.getElementById('dashEmergencyName').innerText=out.emergency_contact_name||'Not provided';
+    document.getElementById('dashEmergencyPhone').innerText=out.emergency_contact_phone||'Not provided';
+    document.getElementById('authView').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+  }catch(e){setMessage('loginMessage','Unable to load your patient record.','error');}
+}
+function logoutPatient(){localStorage.removeItem('patient_token');localStorage.removeItem('patient_emias_id');document.getElementById('dashboard').style.display='none';document.getElementById('authView').style.display='grid';showAuth('login');}
+window.addEventListener('DOMContentLoaded',()=>{if(localStorage.getItem('patient_token'))loadPatientProfile();});
+</script>
+</body>
+</html>
