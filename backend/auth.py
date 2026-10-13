@@ -5,7 +5,14 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
 
-SECRET_KEY = "EMIAS_SECRET_KEY_CHANGE_THIS_LATER"
+import os
+
+SECRET_KEY = os.getenv("EMIAS_SECRET_KEY")
+
+if not SECRET_KEY:
+    raise RuntimeError(
+        "EMIAS_SECRET_KEY environment variable is not configured."
+    )
 
 ALGORITHM = "HS256"
 
