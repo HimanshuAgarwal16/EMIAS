@@ -92,7 +92,103 @@ a{text-decoration:none;color:inherit}
       </div>
       <div class="section-title" style="margin-top:28px">EMERGENCY CONTACT</div>
       <div class="record-grid"><div class="record"><label>Contact Name</label><strong id="dashEmergencyName">—</strong></div><div class="record"><label>Contact Phone</label><strong id="dashEmergencyPhone">—</strong></div></div>
+
+
+</div>
+
+<div class="panel" style="margin-top:20px">
+<div class="section-title" style="margin-top:28px">EDIT MY PROFILE</div>
+<div class="form-grid" id="editProfileForm">
+  <div class="field">
+    <label for="editBloodGroup">Blood Group</label>
+    <select id="editBloodGroup">
+      <option value="">Select blood group</option>
+      <option>A+</option><option>A-</option>
+      <option>B+</option><option>B-</option>
+      <option>AB+</option><option>AB-</option>
+      <option>O+</option><option>O-</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="editPhone">Phone Number</label>
+    <input id="editPhone" type="tel" placeholder="Phone number">
+  </div>
+  <div class="field full">
+    <label for="editAddress">Address</label>
+    <textarea id="editAddress" placeholder="Complete address"></textarea>
+  </div>
+  <div class="field full">
+    <label for="editAllergies">Allergies</label>
+    <textarea id="editAllergies" placeholder="Enter allergies, or leave blank"></textarea>
+  </div>
+  <div class="field full">
+    <label for="editConditions">Medical Conditions</label>
+    <textarea id="editConditions" placeholder="Medical conditions"></textarea>
+  </div>
+  <div class="field full">
+    <label for="editMedications">Current Medications</label>
+    <textarea id="editMedications" placeholder="Current medications"></textarea>
+  </div>
+  <div class="field">
+    <label for="editEmergencyName">Emergency Contact Name</label>
+    <input id="editEmergencyName" placeholder="Contact name">
+  </div>
+  <div class="field">
+    <label for="editEmergencyPhone">Emergency Contact Phone</label>
+    <input id="editEmergencyPhone" type="tel" placeholder="Contact phone">
+  </div>
+</div>
+<button class="btn" onclick="savePatientProfile()">Save Profile Changes</button>
+<div id="editProfileMessage" class="message"></div>
+</div>
+
+<div class="panel" style="margin-top:20px">
+
       <div id="dashboardMessage" class="message"></div>
+
+      <!-- PATIENT MEDICAL FILES -->
+<div class="panel" id="patientMedicalFilesPanel" style="margin-top:20px">
+  <div class="section-title">MY MEDICAL FILES</div>
+  <p style="color:var(--muted);margin-bottom:20px">
+    Upload and manage your personal medical reports securely.
+  </p>
+
+  <form id="patientMedicalFileForm">
+    <div class="field">
+      <label for="patientReportType">Report Type</label>
+      <select id="patientReportType" required>
+        <option value="">Select report type</option>
+        <option value="ECG">ECG</option>
+        <option value="X-Ray">X-Ray</option>
+        <option value="MRI">MRI</option>
+        <option value="CT">CT</option>
+        <option value="Blood Report">Blood Report</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="field" style="margin-top:15px">
+      <label for="patientMedicalFile">Choose File (PDF, JPG, PNG — max 10 MB)</label>
+      <input
+        id="patientMedicalFile"
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png"
+        required
+      >
+    </div>
+
+    <button class="btn" type="submit">Upload Medical File</button>
+    <div id="patientFileMessage" class="message"></div>
+  </form>
+
+  <div class="section-title" style="margin-top:30px">
+    UPLOADED FILE HISTORY
+  </div>
+  <div id="patientMedicalFileHistory">
+    Your uploaded medical files will appear here.
+  </div>
+</div>
+
     </div>
   </section>
 </main>
@@ -171,12 +267,227 @@ async function loadPatientProfile(){
     document.getElementById('dashAddress').innerText=out.address||'Not provided';
     document.getElementById('dashEmergencyName').innerText=out.emergency_contact_name||'Not provided';
     document.getElementById('dashEmergencyPhone').innerText=out.emergency_contact_phone||'Not provided';
+
+    document.getElementById('editBloodGroup').value=out.blood_group||'';
+    document.getElementById('editPhone').value=out.phone||'';
+    document.getElementById('editAddress').value=out.address||'';
+    document.getElementById('editAllergies').value=out.allergies||'';
+    document.getElementById('editConditions').value=out.medical_conditions||'';
+    document.getElementById('editMedications').value=out.medications||'';
+    document.getElementById('editEmergencyName').value=out.emergency_contact_name||'';
+    document.getElementById('editEmergencyPhone').value=out.emergency_contact_phone||'';
+
     document.getElementById('authView').style.display='none';
     document.getElementById('dashboard').style.display='block';
+    await loadPatientMedicalFiles();
   }catch(e){setMessage('loginMessage','Unable to load your patient record.','error');}
 }
+
+
+
+async function savePatientProfile(){
+  const token=localStorage.getItem('patient_token');
+
+  if(!token){
+    setMessage('editProfileMessage','Please sign in again.','error');
+    return;
+  }
+
+  const data={
+    blood_group:document.getElementById('editBloodGroup').value,
+    phone:document.getElementById('editPhone').value.trim(),
+    address:document.getElementById('editAddress').value.trim(),
+    allergies:document.getElementById('editAllergies').value.trim(),
+    medical_conditions:document.getElementById('editConditions').value.trim(),
+    medications:document.getElementById('editMedications').value.trim(),
+    emergency_contact_name:document.getElementById('editEmergencyName').value.trim(),
+    emergency_contact_phone:document.getElementById('editEmergencyPhone').value.trim()
+  };
+
+  try{
+    const res=await fetch('/patients/me',{
+      method:'PUT',
+      headers:{
+        'Authorization':'Bearer '+token,
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify(data)
+    });
+
+    const out=await res.json();
+
+    if(!res.ok){
+      setMessage('editProfileMessage',out.detail||'Unable to update profile.','error');
+      return;
+    }
+
+    await loadPatientProfile();
+    setMessage('editProfileMessage','Profile updated successfully.','success');
+  }catch(e){
+    setMessage('editProfileMessage','Unable to connect to EMIAS server.','error');
+  }
+}
+
 function logoutPatient(){localStorage.removeItem('patient_token');localStorage.removeItem('patient_emias_id');document.getElementById('dashboard').style.display='none';document.getElementById('authView').style.display='grid';showAuth('login');}
 window.addEventListener('DOMContentLoaded',()=>{if(localStorage.getItem('patient_token'))loadPatientProfile();});
+
+
+async function uploadPatientMedicalFile(event) {
+  event.preventDefault();
+
+  const token = localStorage.getItem('patient_token');
+  const fileInput = document.getElementById('patientMedicalFile');
+  const reportType = document.getElementById('patientReportType');
+  const message = document.getElementById('patientFileMessage');
+  const file = fileInput.files[0];
+
+  if (!token) {
+    message.textContent = 'Please sign in again.';
+    return;
+  }
+
+  if (!file) {
+    message.textContent = 'Please choose a file.';
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    message.textContent = 'File size must not exceed 10 MB.';
+    return;
+  }
+
+  const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+  const extension = file.name.split('.').pop().toLowerCase();
+
+  if (!allowedExtensions.includes(extension)) {
+    message.textContent = 'Only PDF, JPG, JPEG, and PNG files are allowed.';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('report_type', reportType.value);
+  formData.append('medical_file', file);
+
+  message.textContent = 'Uploading...';
+
+  try {
+    const response = await fetch('/patients/me/medical-files', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      message.textContent = result.detail || 'Upload failed.';
+      return;
+    }
+
+    message.textContent = 'Medical file uploaded successfully.';
+    document.getElementById('patientMedicalFileForm').reset();
+
+    await loadPatientMedicalFiles();
+  } catch (error) {
+    message.textContent = 'Unable to connect to the EMIAS server.';
+  }
+}
+
+
+async function loadPatientMedicalFiles() {
+  const token = localStorage.getItem('patient_token');
+  const history = document.getElementById('patientMedicalFileHistory');
+
+  if (!history) return;
+
+  if (!token) {
+    history.textContent = 'Please sign in to view your medical files.';
+    return;
+  }
+
+  history.textContent = 'Loading your files...';
+
+  try {
+    const response = await fetch('/patients/me/medical-files', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      history.textContent = result.detail || 'Unable to load files.';
+      return;
+    }
+
+    history.replaceChildren();
+
+    if (!result.files || result.files.length === 0) {
+      history.textContent = 'No medical files uploaded yet.';
+      return;
+    }
+
+    result.files.forEach(file => {
+      const card = document.createElement('div');
+      card.style.cssText =
+        'padding:14px;margin-top:12px;border:1px solid #39465b;border-radius:10px;';
+
+      const name = document.createElement('div');
+      name.textContent = file.filename;
+      name.style.fontWeight = '600';
+
+      const details = document.createElement('p');
+      details.textContent =
+        file.report_type + ' • Uploaded: ' + file.uploaded_at;
+
+      const download = document.createElement('button');
+      download.type = 'button';
+      download.className = 'btn';
+      download.textContent = 'Download';
+      download.style.marginTop = '8px';
+
+      download.addEventListener('click', async () => {
+        download.disabled = true;
+        download.textContent = 'Downloading...';
+
+        try {
+          const downloadResponse = await fetch(
+            '/patients/me/medical-files/' + encodeURIComponent(file.id) + '/download',
+            { headers: { 'Authorization': 'Bearer ' + token } }
+          );
+
+          if (!downloadResponse.ok) {
+            throw new Error('Download failed');
+          }
+
+          const blob = await downloadResponse.blob();
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = file.filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          alert('Unable to download this file. Please try again.');
+        } finally {
+          download.disabled = false;
+          download.textContent = 'Download';
+        }
+      });
+
+      card.append(name, details, download);
+      history.appendChild(card);
+    });
+  } catch (error) {
+    history.textContent = 'Unable to connect to the EMIAS server.';
+  }
+}
+
+
+document.getElementById('patientMedicalFileForm')
+  ?.addEventListener('submit', uploadPatientMedicalFile);
+
 </script>
 </body>
 </html>

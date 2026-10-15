@@ -3,9 +3,36 @@ from jose import jwt
 from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-
-
+from cryptography.fernet import Fernet
 import os
+import json
+
+
+FACE_ENCRYPTION_KEY = os.getenv("EMIAS_FACE_ENCRYPTION_KEY")
+
+def encrypt_face_embedding(embedding: list[float]) -> str:
+    if not FACE_ENCRYPTION_KEY:
+        raise RuntimeError(
+            "EMIAS_FACE_ENCRYPTION_KEY environment variable is not set"
+        )
+
+    cipher = Fernet(FACE_ENCRYPTION_KEY.encode())
+    embedding_text = json.dumps(embedding)
+    return cipher.encrypt(embedding_text.encode()).decode()
+
+
+def decrypt_face_embedding(encrypted_embedding: str) -> list[float]:
+    if not FACE_ENCRYPTION_KEY:
+        raise RuntimeError(
+            "EMIAS_FACE_ENCRYPTION_KEY environment variable is not set"
+        )
+
+    cipher = Fernet(FACE_ENCRYPTION_KEY.encode())
+    decrypted_text = cipher.decrypt(encrypted_embedding.encode()).decode()
+    return json.loads(decrypted_text)
+
+
+
 
 SECRET_KEY = os.getenv("EMIAS_SECRET_KEY")
 
