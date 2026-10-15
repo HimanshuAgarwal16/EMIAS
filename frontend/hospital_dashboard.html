@@ -1530,6 +1530,36 @@ body{
     font-size: 12px;
     line-height: 1.5;
 }
+
+
+
+#face-search-message {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #eaf2ff !important;
+    background: #173047 !important;
+    padding: 16px !important;
+    margin-top: 14px !important;
+    border: 1px solid #47718e !important;
+    border-radius: 8px !important;
+    line-height: 1.7 !important;
+    overflow-wrap: anywhere;
+    min-height: 24px;
+}
+
+#face-search-message p {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #eaf2ff !important;
+    margin: 6px 0 !important;
+}
+
+
+#face-search-message:empty {
+    display: none !important;
+}
 </style>
 
 </head>
@@ -3804,86 +3834,99 @@ async function loadReportHistory(emiasId) {
 
 
 
+
 async function searchPatientByFace() {
     const token = localStorage.getItem("hospital_token");
     const imageInput = document.getElementById("face-search-image");
-    const message = document.getElementById("face-search-message");
+    const resultBox = document.getElementById("face-search-message");
     const button = document.getElementById("face-search-button");
 
     if (!token) {
-        message.textContent = "Please log in as a hospital.";
+        resultBox.textContent = "Please log in as a hospital first.";
         return;
     }
-
+    
     if (!imageInput.files || imageInput.files.length === 0) {
-        message.textContent = "Please select a face image first.";
+        resultBox.textContent = "Please select a face image first.";
         return;
     }
 
     const image = imageInput.files[0];
 
-    if (!["image/jpeg", "image/png"].includes(image.type)) {
-        message.textContent = "Please select a JPG or PNG image.";
-        return;
-    }
+if (!["image/jpeg", "image/png"].includes(image.type)) {
+    resultBox.textContent = "Please select a JPG or PNG image.";
+    return;
+}
 
     if (image.size > 5 * 1024 * 1024) {
-        message.textContent = "Image must be no larger than 5 MB.";
+        resultBox.textContent = "Image must be no larger than 5 MB.";
         return;
     }
 
     const formData = new FormData();
     formData.append("face_image", image);
 
+
     button.disabled = true;
-    button.textContent = "Matching face...";
-    message.textContent = "";
+    resultBox.textContent = "Searching for a possible match...";
 
     try {
-        const response = await fetch(
-            "http://127.0.0.1:8000/hospital/match-patient-face",
-            {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                },
-                body: formData
-            }
-        );
+        const response = await fetch("/hospital/match-patient-face", {
+            method: "POST",
+            headers: {
+                Authorization: "Bearer " + token
+            },
+            body: formData
+        });
 
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.detail || "Face matching failed.");
-        }
-
-        if (!data.matched || !data.emias_id) {
-            message.textContent =
-                data.message || "No possible match found.";
-
-            message.style.display = "block";
-            message.className = "message error";
-
+            resultBox.textContent =
+                data.detail || "Face matching failed.";
             return;
         }
 
-        document.getElementById("emias_id").value = data.emias_id;
+        if (data.matched && data.emias_id) {
+            const score = Number(data.similarity_score);
 
-        message.textContent =
-            `Possible match: ${data.full_name} (${data.emias_id}). ` +
-            `Similarity: ${data.similarity_score}. ` +
-            "Verify the patient's identity before accessing records.";
+            resultBox.replaceChildren();
 
+            const heading = document.createElement("p");
+            heading.textContent = "Possible patient match found.";
+            resultBox.appendChild(heading);
+
+            const idLine = document.createElement("p");
+            idLine.textContent = "EMIAS ID: " + data.emias_id;
+            resultBox.appendChild(idLine);
+
+            const scoreLine = document.createElement("p");
+            scoreLine.textContent = Number.isFinite(score)
+                ? "Similarity score: " + score.toFixed(4)
+                : "Similarity score: Not provided by the server";
+            resultBox.appendChild(scoreLine);
+
+            const warning = document.createElement("p");
+            warning.textContent =
+                data.message ||
+                "Verify the patient's identity before accessing records.";
+            resultBox.appendChild(warning);
+
+            // Populate the existing ID search field.
+            document.getElementById("emias_id").value = data.emias_id;
+        } else {
+            resultBox.textContent =
+                data.message || "No sufficiently similar enrolled face was found.";
+        }
     } catch (error) {
-        message.textContent =
-            error.message || "Face matching failed. Please try again.";
-        message.style.display = "block";
-        message.className = "message error";
+        console.error("Face search error:", error);
+        resultBox.textContent =
+            "Unable to connect to the EMIAS server.";
     } finally {
         button.disabled = false;
-        button.textContent = "Find Patient by Face";
     }
 }
+
 
 
 
