@@ -110,14 +110,15 @@ def get_current_hospital(token: str = Depends(oauth2_scheme)):
         )
 
         hospital_id = payload.get("sub")
+        role = payload.get("role")
 
-        if hospital_id is None:
+        if hospital_id is None or role != "hospital":
             raise credentials_exception
 
         return {
             "hospital_id": hospital_id,
             "email": payload.get("email"),
-            "role": payload.get("role")
+            "role": "role"
         }
 
     except Exception:
