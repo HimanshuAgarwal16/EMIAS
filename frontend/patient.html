@@ -94,6 +94,82 @@ a{text-decoration:none;color:inherit}
       <div class="record-grid"><div class="record"><label>Contact Name</label><strong id="dashEmergencyName">—</strong></div><div class="record"><label>Contact Phone</label><strong id="dashEmergencyPhone">—</strong></div></div>
 
 
+
+
+<!-- FACE RECOGNITION ENROLLMENT -->
+<div class="panel" id="faceEnrollmentPanel" style="margin-top:20px">
+  <div class="section-title">FACE RECOGNITION ENROLLMENT</div>
+
+  <p style="color:var(--muted);line-height:1.6;margin-bottom:16px">
+    Enroll your face to help authorized hospital staff identify your EMIAS
+    record during emergencies. Face matching is only an identification aid
+    and does not replace authentication.
+  </p>
+
+  <div class="security-note" style="margin:0 0 18px">
+    Your face template is stored in encrypted form. Camera access requires
+    your permission, and enrollment requires your explicit consent.
+  </div>
+
+  <label style="display:flex;gap:10px;align-items:flex-start;margin-bottom:18px">
+    <input
+      type="checkbox"
+      id="faceConsent"
+      style="width:auto;margin-top:3px;flex-shrink:0"
+    >
+    <span>
+      I consent to EMIAS processing my face image to generate and securely
+      store a face template for identification. I understand that face
+      matching may be inaccurate and is not proof of identity.
+    </span>
+  </label>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px">
+    <button type="button" class="btn" id="startFaceCamera"
+      style="width:auto;margin-top:0">
+      Start Camera
+    </button>
+    <button type="button" class="btn secondary" id="stopFaceCamera"
+      style="width:auto;margin-top:0" disabled>
+      Stop Camera
+    </button>
+  </div>
+
+  <video
+    id="faceCameraPreview"
+    autoplay
+    playsinline
+    muted
+    style="display:none;width:100%;max-width:480px;border-radius:12px;background:#000"
+  ></video>
+
+  <canvas id="faceCaptureCanvas" style="display:none"></canvas>
+
+  <img
+    id="faceCapturedPreview"
+    alt="Captured face preview"
+    style="display:none;width:100%;max-width:480px;border-radius:12px;margin-top:12px"
+  >
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
+    <button type="button" class="btn" id="captureFaceButton"
+      style="width:auto;margin-top:0" disabled>
+      Capture Photo
+    </button>
+    <button type="button" class="btn secondary" id="retakeFaceButton"
+      style="width:auto;margin-top:0;display:none">
+      Retake Photo
+    </button>
+    <button type="button" class="btn" id="enrollFaceButton"
+      style="width:auto;margin-top:0" disabled>
+      Enroll Face
+    </button>
+  </div>
+
+  <div id="faceEnrollmentMessage" class="message" aria-live="polite"></div>
+</div>
+
+
 </div>
 
 <div class="panel" style="margin-top:20px">
@@ -487,6 +563,174 @@ async function loadPatientMedicalFiles() {
 
 document.getElementById('patientMedicalFileForm')
   ?.addEventListener('submit', uploadPatientMedicalFile);
+
+
+let faceCameraStream = null;
+let capturedFaceBlob = null;
+
+const faceVideo = document.getElementById("faceCameraPreview");
+const faceCanvas = document.getElementById("faceCaptureCanvas");
+const facePreview = document.getElementById("faceCapturedPreview");
+const faceConsent = document.getElementById("faceConsent");
+const faceMessage = document.getElementById("faceEnrollmentMessage");
+
+function setFaceMessage(text, type) {
+  faceMessage.textContent = text;
+  faceMessage.className = "message " + type;
+}
+
+function stopFaceCamera() {
+  if (faceCameraStream) {
+    faceCameraStream.getTracks().forEach(track => track.stop());
+    faceCameraStream = null;
+  }
+
+  faceVideo.srcObject = null;
+  faceVideo.style.display = "none";
+
+  document.getElementById("startFaceCamera").disabled = false;
+  document.getElementById("stopFaceCamera").disabled = true;
+  document.getElementById("captureFaceButton").disabled = true;
+}
+
+document.getElementById("startFaceCamera").addEventListener("click", async () => {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setFaceMessage(
+        "Camera access is unavailable. Open EMIAS using localhost or HTTPS.",
+        "error"
+      );
+      return;
+    }
+
+    faceCameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user" },
+      audio: false
+    });
+
+    faceVideo.srcObject = faceCameraStream;
+    faceVideo.style.display = "block";
+
+    document.getElementById("startFaceCamera").disabled = true;
+    document.getElementById("stopFaceCamera").disabled = false;
+    document.getElementById("captureFaceButton").disabled = false;
+
+    setFaceMessage("Camera started. Position your face in the preview.", "success");
+  } catch (error) {
+    setFaceMessage(
+      "Unable to access the camera. Allow camera permission and try again.",
+      "error"
+    );
+  }
+});
+
+document.getElementById("stopFaceCamera").addEventListener("click", () => {
+  stopFaceCamera();
+  setFaceMessage("Camera stopped.", "success");
+});
+
+document.getElementById("captureFaceButton").addEventListener("click", () => {
+  if (!faceCameraStream || !faceVideo.videoWidth) {
+    setFaceMessage("Start the camera and wait for the preview before capturing.", "error");
+    return;
+  }
+
+  faceCanvas.width = faceVideo.videoWidth;
+  faceCanvas.height = faceVideo.videoHeight;
+
+  const context = faceCanvas.getContext("2d");
+  context.drawImage(faceVideo, 0, 0, faceCanvas.width, faceCanvas.height);
+
+  faceCanvas.toBlob(blob => {
+    if (!blob) {
+      setFaceMessage("Unable to capture the photo. Please try again.", "error");
+      return;
+    }
+
+    capturedFaceBlob = blob;
+    facePreview.src = URL.createObjectURL(blob);
+    facePreview.style.display = "block";
+
+    document.getElementById("retakeFaceButton").style.display = "inline-block";
+    document.getElementById("enrollFaceButton").disabled = false;
+
+    stopFaceCamera();
+    setFaceMessage("Photo captured. Review it before enrolling.", "success");
+  }, "image/jpeg", 0.9);
+});
+
+document.getElementById("retakeFaceButton").addEventListener("click", () => {
+  capturedFaceBlob = null;
+  facePreview.removeAttribute("src");
+  facePreview.style.display = "none";
+
+  document.getElementById("retakeFaceButton").style.display = "none";
+  document.getElementById("enrollFaceButton").disabled = true;
+
+  setFaceMessage("Start the camera to capture another photo.", "success");
+});
+
+document.getElementById("enrollFaceButton").addEventListener("click", async () => {
+  const token = localStorage.getItem("patient_token");
+
+  if (!token) {
+    setFaceMessage("Please sign in again before enrolling your face.", "error");
+    return;
+  }
+
+  if (!faceConsent.checked) {
+    setFaceMessage("Please provide explicit consent before enrollment.", "error");
+    return;
+  }
+
+  if (!capturedFaceBlob) {
+    setFaceMessage("Capture a photo before enrolling.", "error");
+    return;
+  }
+
+  const button = document.getElementById("enrollFaceButton");
+  button.disabled = true;
+  setFaceMessage("Submitting enrollment securely...", "success");
+
+  try {
+    const formData = new FormData();
+    formData.append("face_image", capturedFaceBlob, "face_capture.jpg");
+    formData.append("consent_given", "true");
+
+    const response = await fetch("/patients/me/face-enrollment", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token
+      },
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.detail || "Face enrollment failed.");
+    }
+
+    setFaceMessage(
+      result.message || "Face enrollment completed successfully.",
+      "success"
+    );
+
+    faceConsent.checked = false;
+    capturedFaceBlob = null;
+    facePreview.removeAttribute("src");
+    facePreview.style.display = "none";
+    document.getElementById("retakeFaceButton").style.display = "none";
+  } catch (error) {
+    setFaceMessage(error.message || "Unable to complete face enrollment.", "error");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+window.addEventListener("pagehide", stopFaceCamera);
+
+
 
 </script>
 </body>
