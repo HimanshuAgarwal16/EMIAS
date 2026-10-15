@@ -5,10 +5,10 @@ SQLAlchemy==2.0.54
 pydantic==2.13.5
 python-jose==3.5.0
 argon2-cffi==25.1.0
+cryptography==50.0.1
 python-multipart==0.0.32
 torch==2.14.0
 torchvision==0.29.0
 Pillow==12.3.0
 opencv-python-headless==5.0.0.93
 grad-cam==1.5.7
-argon2-cffi==25.1.0
