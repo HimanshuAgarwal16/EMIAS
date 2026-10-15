@@ -502,27 +502,6 @@ def get_patient(
 
 
 
-@app.get("/patients/lookup/{emias_id}", response_model=PatientResponse)
-def lookup_patient(
-    emias_id: str,
-    db: Session = Depends(get_db)
-):
-    patient = (
-        db.query(Patient)
-        .filter(Patient.emias_id == emias_id)
-        .first()
-    )
-
-    if not patient:
-        raise HTTPException(
-            status_code=404,
-            detail="Patient not found"
-        )
-
-    return patient
-
-
-
 # ---------------------------------------------------------
 # HOSPITAL REGISTRATION
 # ---------------------------------------------------------
