@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, Boolean
 from .database import Base
 
 
@@ -43,7 +43,7 @@ class AccessLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    hospital_id = Column(Integer, nullable=False)
+    hospital_id = Column(Integer, nullable=True)
     hospital_email = Column(String(150), nullable=False)
 
     emias_id = Column(String(20), nullable=False)
@@ -76,3 +76,48 @@ class MedicalReport(Base):
     analysis_status = Column(String(50), nullable=True)
 
     uploaded_at = Column(String(50), nullable=False)
+    
+    uploaded_by_role = Column(String(20), nullable=False, default="hospital")
+    
+    
+    
+
+class PatientMedicalFile(Base):
+    __tablename__ = "patient_medical_files"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    emias_id = Column(String(20), nullable=False, index=True)
+
+    filename = Column(String(255), nullable=False)
+
+    original_filename = Column(String(255), nullable=False)
+
+    report_type = Column(String(50), nullable=False)
+
+    uploaded_at = Column(String(50), nullable=False)
+
+
+
+
+
+class PatientFaceTemplate(Base):
+    __tablename__ = "patient_face_templates"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Links the face template to the registered EMIAS patient.
+    emias_id = Column(
+        String(20),
+        unique=True,
+        index=True,
+        nullable=False
+    )
+
+    # Serialized face embedding, not the original photograph.
+    face_embedding = Column(Text, nullable=False)
+
+    # Face enrollment must be based on explicit patient consent.
+    consent_given = Column(Boolean, nullable=False, default=False)
+
+    enrolled_at = Column(String(50), nullable=False)

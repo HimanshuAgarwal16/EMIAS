@@ -1474,6 +1474,62 @@ body{
     border-color:#294761 !important;
 }
 
+
+
+/* Face recognition panel */
+.face-panel {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #1d3853;
+    border-radius: 14px;
+    background: #091827;
+}
+
+.face-panel h3 {
+    color: #e7f1fb;
+    margin-bottom: 8px;
+}
+
+.face-panel p {
+    color: #91a7bb;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.face-panel input[type="file"] {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    color: #e7f1fb;
+    background: #071625;
+    border: 1px solid #24415d;
+    border-radius: 9px;
+}
+
+.face-panel .face-btn {
+    width: 100%;
+    padding: 13px;
+    border: 0;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #0891b2, #2563eb);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.face-panel .face-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.face-notice {
+    margin-top: 12px;
+    color: #fbbf24;
+    font-size: 12px;
+    line-height: 1.5;
+}
 </style>
 
 </head>
@@ -1673,7 +1729,53 @@ body{
 
         </div>
 
+        
+        <!-- FACE RECOGNITION -->
+        <div class="card">
+            <div class="card-title">
+                <div class="card-title-icon">◎</div>
+                <h2>Face Recognition</h2>
+            </div>
 
+            <p class="card-description">
+                Identify a consenting, previously enrolled patient
+                using face matching as an additional identification option.
+            </p>
+
+            <div class="face-panel">
+                <h3>Identify Patient by Face</h3>
+
+                <p>
+                    Select a clear JPG or PNG image containing one face.
+                    The system will search enrolled patient templates.
+                    Verify the patient's identity before accessing records.
+                </p>
+
+                <label for="face-search-image">Select Patient Image</label>
+                <input
+                    type="file"
+                    id="face-search-image"
+                    accept="image/jpeg,image/png"
+                >
+
+                <button
+                    type="button"
+                    class="face-btn"
+                    id="face-search-button"
+                    onclick="searchPatientByFace()"
+                >
+                    Find Patient by Face
+                </button>
+
+                <div
+                    id="face-search-message"
+                    class="message"
+                ></div>
+            </div>
+        </div>
+
+  
+        
         <!-- =========================
              PATIENT CARD
         ========================== -->
@@ -3696,6 +3798,94 @@ async function loadReportHistory(emiasId) {
         );
     }
 }
+
+
+
+
+
+
+async function searchPatientByFace() {
+    const token = localStorage.getItem("hospital_token");
+    const imageInput = document.getElementById("face-search-image");
+    const message = document.getElementById("face-search-message");
+    const button = document.getElementById("face-search-button");
+
+    if (!token) {
+        message.textContent = "Please log in as a hospital.";
+        return;
+    }
+
+    if (!imageInput.files || imageInput.files.length === 0) {
+        message.textContent = "Please select a face image first.";
+        return;
+    }
+
+    const image = imageInput.files[0];
+
+    if (!["image/jpeg", "image/png"].includes(image.type)) {
+        message.textContent = "Please select a JPG or PNG image.";
+        return;
+    }
+
+    if (image.size > 5 * 1024 * 1024) {
+        message.textContent = "Image must be no larger than 5 MB.";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("face_image", image);
+
+    button.disabled = true;
+    button.textContent = "Matching face...";
+    message.textContent = "";
+
+    try {
+        const response = await fetch(
+            "http://127.0.0.1:8000/hospital/match-patient-face",
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || "Face matching failed.");
+        }
+
+        if (!data.matched || !data.emias_id) {
+            message.textContent =
+                data.message || "No possible match found.";
+
+            message.style.display = "block";
+            message.className = "message error";
+
+            return;
+        }
+
+        document.getElementById("emias_id").value = data.emias_id;
+
+        message.textContent =
+            `Possible match: ${data.full_name} (${data.emias_id}). ` +
+            `Similarity: ${data.similarity_score}. ` +
+            "Verify the patient's identity before accessing records.";
+
+    } catch (error) {
+        message.textContent =
+            error.message || "Face matching failed. Please try again.";
+        message.style.display = "block";
+        message.className = "message error";
+    } finally {
+        button.disabled = false;
+        button.textContent = "Find Patient by Face";
+    }
+}
+
+
 
 
     </script>
