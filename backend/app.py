@@ -376,6 +376,7 @@ async def match_patient_face(
             detail="The image must contain exactly one detectable face.",
         )
 
+
     aligned_face = face_recognizer.alignCrop(image, faces[0])
     uploaded_embedding = face_recognizer.feature(
         aligned_face
@@ -600,16 +601,20 @@ def hospital_login(
     )
 
     if not existing_hospital:
+        print("[LOGIN DEBUG] Hospital email not found in database")
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password"
-        )
+    )
+
+    print("[LOGIN DEBUG] Hospital email found in database")
 
     # Verify password
     password_valid = verify_password(
         form_data.password,
         existing_hospital.hashed_password
     )
+    print(f"[LOGIN DEBUG] Password verification result: {password_valid}")
 
     if not password_valid:
         raise HTTPException(
