@@ -20,8 +20,7 @@ AI_DIR = os.path.join(
 if AI_DIR not in sys.path:
     sys.path.append(AI_DIR)
 
-from inference import predict_ecg
-from ai.gradcam import generate_gradcam
+
 
 from .database import engine, get_db, Base
 from .models import (
@@ -55,28 +54,44 @@ Base.metadata.create_all(bind=engine)
 
 
 
+
 FACE_MODEL_DIR = os.path.join(AI_DIR, "face_models")
 
-FACE_DETECTOR = cv2.FaceDetectorYN_create(
-    os.path.join(
-        FACE_MODEL_DIR,
-        "face_detection_yunet_2023mar.onnx"
-    ),
-    "",
-    (320, 320),
-    0.9,
-    0.3,
-    5000
-)
+FACE_DETECTOR = None
+FACE_RECOGNIZER = None
 
-FACE_RECOGNIZER = cv2.FaceRecognizerSF_create(
-    os.path.join(
-        FACE_MODEL_DIR,
-        "face_recognition_sface_2021dec.onnx"
-    ),
-    ""
-)
 
+def get_face_models():
+    global FACE_DETECTOR, FACE_RECOGNIZER
+
+    if FACE_DETECTOR is None or FACE_RECOGNIZER is None:
+        detector_path = os.path.join(
+            FACE_MODEL_DIR,
+            "face_detection_yunet_2023mar.onnx"
+        )
+        recognizer_path = os.path.join(
+            FACE_MODEL_DIR,
+            "face_recognition_sface_2021dec.onnx"
+        )
+
+        detector = cv2.FaceDetectorYN_create(
+            detector_path,
+            "",
+            (320, 320),
+            0.9,
+            0.3,
+            5000
+        )
+
+        recognizer = cv2.FaceRecognizerSF_create(
+            recognizer_path,
+            ""
+        )
+
+        FACE_DETECTOR = detector
+        FACE_RECOGNIZER = recognizer
+
+    return FACE_DETECTOR, FACE_RECOGNIZER
 
 
 app = FastAPI(
@@ -235,9 +250,11 @@ async def enroll_patient_face(
             detail="The uploaded file is not a valid image.",
         )
 
+    face_detector, face_recognizer = get_face_models()
+
     height, width = image.shape[:2]
-    FACE_DETECTOR.setInputSize((width, height))
-    _, faces = FACE_DETECTOR.detect(image)
+    face_detector.setInputSize((width, height))
+    _, faces = face_detector.detect(image)
 
     if faces is None or len(faces) != 1:
         raise HTTPException(
@@ -245,8 +262,8 @@ async def enroll_patient_face(
             detail="The image must contain exactly one detectable face.",
         )
 
-    aligned_face = FACE_RECOGNIZER.alignCrop(image, faces[0])
-    embedding = FACE_RECOGNIZER.feature(aligned_face).flatten().tolist()
+    aligned_face = face_recognizer.alignCrop(image, faces[0])
+    embedding = face_recognizer.feature(aligned_face).flatten().tolist()
 
     emias_id = current_patient["emias_id"]
     encrypted_embedding = encrypt_face_embedding(embedding)
@@ -345,9 +362,13 @@ async def match_patient_face(
             detail="Invalid image file.",
         )
 
+
+    face_detector, face_recognizer = get_face_models()
+
     height, width = image.shape[:2]
-    FACE_DETECTOR.setInputSize((width, height))
-    _, faces = FACE_DETECTOR.detect(image)
+    face_detector.setInputSize((width, height))
+    _, faces = face_detector.detect(image)
+
 
     if faces is None or len(faces) != 1:
         raise HTTPException(
@@ -355,10 +376,11 @@ async def match_patient_face(
             detail="The image must contain exactly one detectable face.",
         )
 
-    aligned_face = FACE_RECOGNIZER.alignCrop(image, faces[0])
-    uploaded_embedding = FACE_RECOGNIZER.feature(
+    aligned_face = face_recognizer.alignCrop(image, faces[0])
+    uploaded_embedding = face_recognizer.feature(
         aligned_face
     ).flatten()
+
 
     templates = (
         db.query(PatientFaceTemplate)
@@ -377,7 +399,7 @@ async def match_patient_face(
             )
 
             score = float(
-                FACE_RECOGNIZER.match(
+                face_recognizer.match(
                     uploaded_embedding.reshape(1, -1),
                     stored_embedding.reshape(1, -1),
                     cv2.FaceRecognizerSF_FR_COSINE,
@@ -763,6 +785,8 @@ async def upload_medical_report(
     if report_type == "ECG":
 
         try:
+            from inference import predict_ecg
+            from ai.gradcam import generate_gradcam
             ai_result = predict_ecg(
                 file_path
             )
