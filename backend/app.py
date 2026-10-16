@@ -649,6 +649,11 @@ def patient_login(
         .filter(Patient.emias_id == emias_id)
         .first()
     )
+    
+    print(
+        "[PATIENT LOGIN DEBUG] Patient found:",
+        patient is not None
+    )
 
     if not patient:
         raise HTTPException(
@@ -662,10 +667,17 @@ def patient_login(
             detail="Patient password is not set"
         )
 
-    if not verify_password(
+    password_valid = verify_password(
         password,
         patient.password_hash
-    ):
+    )
+
+    print(
+        "[PATIENT LOGIN DEBUG] Password valid:",
+        password_valid
+    )
+
+    if not password_valid:
         raise HTTPException(
             status_code=401,
             detail="Invalid EMIAS ID or password"
