@@ -2100,11 +2100,6 @@ body{
                 <select id="reportType">
                     <option value="">Select report type</option>
                     <option value="ECG">ECG</option>
-                    <option value="X-Ray">X-Ray</option>
-                    <option value="MRI">MRI</option>
-                    <option value="CT">CT Scan</option>
-                    <option value="Blood Report">Blood Report</option>
-                    <option value="Other">Other</option>
                 </select>
 
 
@@ -2184,6 +2179,33 @@ body{
 
 </section>
 
+
+
+<!-- =========================
+     PATIENT UPLOADED REPORTS
+========================== -->
+
+<section class="ai-report-section">
+
+    <h2>📁 Patient Uploaded Reports</h2>
+
+    <p>
+        View and download medical reports uploaded by the patient.
+    </p>
+
+    <div
+        id="patientUploadedReportsContainer"
+        style="
+            overflow-x:auto;
+            margin-top:20px;
+        "
+    >
+        <p style="color:#64748b;">
+            Search for a patient to view uploaded reports.
+        </p>
+    </div>
+
+</section>
 
         <!-- =========================
              ACCESS HISTORY
@@ -2393,6 +2415,7 @@ body{
                 displayPatient(data);
 
                 loadReportHistory(emiasId);
+                loadPatientUploadedReports(emiasId);
 
 
                 showMessage(
@@ -3640,6 +3663,159 @@ async function loadReportHistory(emiasId) {
         `;
     }
 }
+
+
+
+
+async function loadPatientUploadedReports(emiasId) {
+    const container = document.getElementById(
+        "patientUploadedReportsContainer"
+    );
+
+    const token = localStorage.getItem("hospital_token");
+
+    if (!container) return;
+
+    if (!token || !emiasId) {
+        container.innerHTML =
+            "<p>Please search for a patient first.</p>";
+        return;
+    }
+
+    container.innerHTML = "<p>Loading uploaded reports...</p>";
+
+    try {
+        const response = await fetch(
+            `/hospital/patients/${encodeURIComponent(emiasId)}/medical-files`,
+            {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.detail || "Unable to load uploaded reports."
+            );
+        }
+
+        if (!data.files || data.files.length === 0) {
+            container.innerHTML =
+                "<p>No patient-uploaded reports found.</p>";
+            return;
+        }
+
+        const table = document.createElement("table");
+        table.style.cssText = `
+            width:100%;
+            border-collapse:collapse;
+            background:#10243a;
+            color:#e2e8f0;
+            border-radius:10px;
+            overflow:hidden;
+        `;
+
+        table.innerHTML = `
+            <thead>
+                <tr style="background::#10243a;color:#e2e8f0;text-align:left;">
+                    <th style="padding:12px;">File Name</th>
+                    <th style="padding:12px;">Report Type</th>
+                    <th style="padding:12px;">Uploaded At</th>
+                    <th style="padding:12px;">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+
+        const tbody = table.querySelector("tbody");
+
+        for (const file of data.files) {
+            const row = document.createElement("tr");
+            row.style.borderBottom = "1px solid #203b54";
+            row.style.backgroundColor = "#0b1b2b";
+            row.style.color = "#e2e8f0";
+
+            const nameCell = document.createElement("td");
+            nameCell.style.padding = "12px";
+            nameCell.textContent = file.filename || "Unnamed file";
+
+            const typeCell = document.createElement("td");
+            typeCell.style.padding = "12px";
+            typeCell.textContent = file.report_type || "Not specified";
+
+            const dateCell = document.createElement("td");
+            dateCell.style.padding = "12px";
+            dateCell.textContent = file.uploaded_at
+                ? new Date(file.uploaded_at).toLocaleString()
+                : "Not available";
+
+            const actionCell = document.createElement("td");
+            actionCell.style.padding = "12px";
+
+            const downloadButton = document.createElement("button");
+            downloadButton.type = "button";
+            downloadButton.textContent = "Download";
+            downloadButton.style.cssText =
+                "padding:8px 14px;cursor:pointer;background:#2563eb;color:#ffffff;border:none;border-radius:8px;font-weight:600;";
+            
+            downloadButton.addEventListener("click", async () => {
+                downloadButton.disabled = true;
+                downloadButton.textContent = "Downloading...";
+
+                try {
+                    const downloadResponse = await fetch(
+                        `/hospital/patient-medical-files/${file.id}/download`,
+                        {
+                            headers: {
+                                "Authorization": `Bearer ${token}`
+                            }
+                        }
+                    );
+
+                    if (!downloadResponse.ok) {
+                        let message = "Download failed.";
+                        try {
+                            const errorData = await downloadResponse.json();
+                            message = errorData.detail || message;
+                        } catch {}
+                        throw new Error(message);
+                    }
+
+                    const blob = await downloadResponse.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+
+                    link.href = url;
+                    link.download = file.filename || "medical-report";
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    URL.revokeObjectURL(url);
+                } catch (error) {
+                    alert(error.message || "Unable to download file.");
+                } finally {
+                    downloadButton.disabled = false;
+                    downloadButton.textContent = "Download";
+                }
+            });
+
+            actionCell.appendChild(downloadButton);
+            row.append(nameCell, typeCell, dateCell, actionCell);
+            tbody.appendChild(row);
+        }
+
+        container.replaceChildren(table);
+
+    } catch (error) {
+        console.error("Patient uploaded reports error:", error);
+        container.textContent = error.message ||
+            "Unable to load patient-uploaded reports.";
+    }
+}
+
 
 
         /* =========================

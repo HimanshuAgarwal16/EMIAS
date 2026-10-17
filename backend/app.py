@@ -1171,6 +1171,95 @@ def get_my_medical_files(
     }
 
 
+@app.get("/hospital/patients/{emias_id}/medical-files")
+def get_patient_medical_files(
+    emias_id: str,
+    db: Session = Depends(get_db),
+    current_hospital: dict = Depends(get_current_hospital),
+):
+    reports = (
+        db.query(PatientMedicalFile)
+        .filter(PatientMedicalFile.emias_id == emias_id)
+        .order_by(PatientMedicalFile.id.desc())
+        .all()
+    )
+
+    return {
+        "emias_id": emias_id,
+        "total_files": len(reports),
+        "files": [
+            {
+                "id": report.id,
+                "filename": report.original_filename,
+                "report_type": report.report_type,
+                "uploaded_at": report.uploaded_at,
+            }
+            for report in reports
+        ],
+    }
+
+@app.get("/hospital/patient-medical-files/{file_id}/download")
+def download_patient_medical_file_for_hospital(
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_hospital: dict = Depends(get_current_hospital),
+):
+    report = (
+        db.query(PatientMedicalFile)
+        .filter(PatientMedicalFile.id == file_id)
+        .first()
+    )
+
+    if not report:
+        raise HTTPException(
+            status_code=404,
+            detail="Medical file not found."
+        )
+
+    # Confirm the patient record still exists.
+    patient = (
+        db.query(Patient)
+        .filter(Patient.emias_id == report.emias_id)
+        .first()
+    )
+
+    if not patient:
+        raise HTTPException(
+            status_code=404,
+            detail="Patient record not found."
+        )
+
+    file_path = os.path.join(
+        PATIENT_UPLOAD_DIR,
+        report.filename
+    )
+
+    if not os.path.isfile(file_path):
+        raise HTTPException(
+            status_code=404,
+            detail="The stored file could not be found."
+        )
+
+    extension = os.path.splitext(report.filename)[1].lower()
+
+    media_types = {
+        ".pdf": "application/pdf",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+    }
+
+    return FileResponse(
+        path=file_path,
+        media_type=media_types.get(
+            extension,
+            "application/octet-stream"
+        ),
+        filename=report.original_filename,
+    )
+
+
+
 @app.get("/patients/me/medical-files/{file_id}/download")
 def download_my_medical_file(
     file_id: int,
