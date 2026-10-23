@@ -1,3 +1,4 @@
+import json
 import os
 import cv2
 import numpy as np
@@ -722,6 +723,8 @@ async def upload_medical_report(
     report_type: str = Form(...),
     doctor_diagnosis: str = Form(...),
     medical_report: UploadFile = File(...),
+    cbc_measurements: str = Form(""),
+    
     db: Session = Depends(get_db),
     current_hospital: dict = Depends(get_current_hospital)
 ):
@@ -832,12 +835,73 @@ async def upload_medical_report(
             )
 
     # -------------------------
+    # CHEST X-RAY ANALYSIS
+    # -------------------------
+
+    if report_type == "X-Ray":
+        try:
+            from ai.xray_inference import predict_chest_xray
+
+            ai_result = predict_chest_xray(file_path)
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Chest X-ray analysis failed: {str(e)}"
+            )
+            
+    
+    # -------------------------
+    # CBC ANALYSIS
+    # -------------------------
+
+    if report_type == "Blood Report":
+        import json
+
+        try:
+            from ai.cbc_analyzer import analyze_cbc
+
+            if cbc_measurements.strip():
+                measurements = json.loads(cbc_measurements)
+                ai_result = analyze_cbc(measurements)
+
+            else:
+                from ai.cbc_pdf_extractor import extract_cbc_pdf_text
+                from ai.cbc_text_parser import parse_cbc_text
+
+                if extension != ".pdf":
+                    raise HTTPException(
+                        status_code=400,
+                        detail=(
+                            "For image-based CBC reports, "
+                            "enter the measurements manually."
+                        )
+                    )
+
+                report_text = extract_cbc_pdf_text(file_path)
+                ai_result = parse_cbc_text(report_text)
+
+        except HTTPException:
+            raise
+        except (ValueError, json.JSONDecodeError) as e:
+            raise HTTPException(
+                status_code=400,
+                detail=str(e)
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"CBC analysis failed: {str(e)}"
+            )
+
+
+    # -------------------------
     # COMPARE AI WITH DOCTOR
     # -------------------------
 
     analysis_status = "Not Available"
 
-    if ai_result:
+    if ai_result and report_type == "ECG":
 
         doctor_text = doctor_diagnosis.lower().strip()
         ai_text = ai_result["prediction"].lower().strip()
@@ -903,13 +967,13 @@ async def upload_medical_report(
         report_type=report_type,
         doctor_diagnosis=doctor_diagnosis,
         ai_prediction=(
-            ai_result["prediction"]
+            ai_result.get("prediction")
             if ai_result
             else None
         ),
         ai_confidence=(
             str(ai_result["confidence"])
-            if ai_result
+            if ai_result and "confidence" in ai_result
             else None
         ),
         analysis_status=analysis_status,

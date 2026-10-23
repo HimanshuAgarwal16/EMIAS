@@ -1,0 +1,11 @@
+﻿SYNTHETIC CBC REPORT
+FOR SOFTWARE TESTING ONLY - NOT A REAL PATIENT
+
+Test          Result    Unit       Reference Range
+Hemoglobin    13.5      g/dL       12.0 - 16.0
+WBC           7.2       10^3/uL    4.0 - 11.0
+Platelets     250       10^3/uL    150 - 400
+RBC           4.6       10^6/uL    4.0 - 5.5
+Hematocrit    40        %          36 - 46
+
+This synthetic report is for parser testing only.

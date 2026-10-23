@@ -2100,6 +2100,8 @@ body{
                 <select id="reportType">
                     <option value="">Select report type</option>
                     <option value="ECG">ECG</option>
+                    <option value="X-Ray">Chest X-ray</option>
+                    <option value="Blood Report">CBC (Complete Blood Count)</option>
                 </select>
 
 
@@ -2787,6 +2789,50 @@ body{
             "medical_report",
             medicalReport
         );
+        
+        if (reportType === "Blood Report") {
+            const tests = [
+                ["Hemoglobin", "g/dL"],
+                ["WBC", "10^3/uL"],
+                ["Platelets", "10^3/uL"],
+                ["RBC", "10^6/uL"],
+                ["Hematocrit", "%"]
+            ];
+
+            const measurements = {};
+
+            for (const [name, unit] of tests) {
+                const value = document.getElementById(
+                    `cbc_${name}_value`
+                ).value;
+
+                const low = document.getElementById(
+                    `cbc_${name}_low`
+                ).value;
+
+                const high = document.getElementById(
+                    `cbc_${name}_high`
+                ).value;
+
+                if (value === "" || low === "" || high === "") {
+                    alert(`Please enter the value and reference range for ${name}.`);
+                    return;
+                }
+
+                measurements[name] = {
+                    value: Number(value),
+                    unit,
+                    low: Number(low),
+                    high: Number(high)
+                };
+            }
+
+            formData.append(
+                "cbc_measurements",
+                JSON.stringify(measurements)
+            );
+        }
+
 
         const response = await fetch(
             "/ai/upload-report",
@@ -2832,11 +2878,121 @@ body{
 
         let aiHTML = "";
 
+        
         if (
+            aiAnalysis &&
+            aiAnalysis.findings &&
+            data.report_type === "Blood Report"
+        ) {
+            const rows = aiAnalysis.findings.map(item => {
+                let statusColor = "#166534";
+                let statusBackground = "#dcfce7";
+
+                if (item.status === "Below supplied reference range" ||
+                    item.status === "Above supplied reference range") {
+                    statusColor = "#9a3412";
+                    statusBackground = "#ffedd5";
+                }
+
+                return `
+                    <tr>
+                        <td style="padding:10px;border-bottom:1px solid #e2e8f0;">
+                            ${item.test}
+                        </td>
+                        <td style="padding:10px;border-bottom:1px solid #e2e8f0;">
+                            ${item.value} ${item.unit}
+                        </td>
+                        <td style="padding:10px;border-bottom:1px solid #e2e8f0;">
+                            ${item.reference_range}
+                        </td>
+                        <td style="padding:10px;border-bottom:1px solid #e2e8f0;">
+                            <span style="
+                                display:inline-block;
+                                padding:5px 8px;
+                                border-radius:6px;
+                                color:${statusColor};
+                                background:${statusBackground};
+                                font-size:12px;
+                            ">
+                                ${item.status}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+
+            aiHTML = `
+                <div class="ai-result-card"
+                     style="background:#f8fafc;border:1px solid #cbd5e1;
+                            border-radius:14px;padding:20px;margin-top:20px;">
+
+                    <h3 style="margin-top:0;">CBC Report — Reference Range Analysis</h3>
+
+                    <p>Measurements compared with the reference ranges provided in the report.</p>
+
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%;border-collapse:collapse;text-align:left;">
+                            <thead>
+                                <tr>
+                                    <th style="padding:10px;">Test</th>
+                                    <th style="padding:10px;">Result</th>
+                                    <th style="padding:10px;">Reference Range</th>
+                                    <th style="padding:10px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+
+                    <p style="font-size:13px;color:#64748b;margin-top:15px;">
+                        ${aiAnalysis.disclaimer || "This analysis is not a diagnosis. Consult a qualified healthcare professional."}
+                    </p>
+                </div>
+            `;
+        }
+
+
+
+        if (
+            aiAnalysis &&
+            aiAnalysis.top_outputs &&
+            data.report_type === "X-Ray"
+        ) {
+            const rows = aiAnalysis.top_outputs.map(item => `
+                <tr>
+                    <td style="padding:10px;border-bottom:1px solid #e2e8f0;">
+                        ${item.label}
+                    </td>
+                    <td style="padding:10px;border-bottom:1px solid #e2e8f0;">
+                        ${item.score}
+                    </td>
+                </tr>
+            `).join("");
+
+            aiHTML = `
+                <div class="ai-result-card"
+                     style="background:#f8fafc;border:1px solid #cbd5e1;
+                            border-radius:14px;padding:20px;margin-top:20px;">
+                    <h3 style="margin-top:0;">Chest X-ray — Experimental AI Output</h3>
+                    <p>Top five model outputs (raw scores, not calibrated diagnostic probabilities):</p>
+                    <table style="width:100%;border-collapse:collapse;text-align:left;">
+                        <thead>
+                            <tr>
+                                <th style="padding:10px;">Model label</th>
+                                <th style="padding:10px;">Raw score</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <p style="font-size:13px;color:#64748b;margin-top:15px;">
+                        ${aiAnalysis.disclaimer}
+                    </p>
+                </div>
+            `;
+        } else if (
             aiAnalysis &&
             aiAnalysis.prediction
         ) {
-
             const prediction =
                 aiAnalysis.prediction;
 
@@ -4109,6 +4265,81 @@ if (!["image/jpeg", "image/png"].includes(image.type)) {
 
     </script>
 
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const reportType = document.getElementById("reportType");
+    const uploadInput = document.getElementById("medicalReport");
+
+    if (!reportType || !uploadInput) return;
+
+    function toggleCBCForm() {
+        let form = document.getElementById("cbcManualFields");
+
+        if (reportType.value !== "Blood Report") {
+            if (form) form.remove();
+            return;
+        }
+
+        if (form) return;
+
+        const tests = [
+            ["Hemoglobin", "g/dL", 12, 16],
+            ["WBC", "10^3/uL", 4, 11],
+            ["Platelets", "10^3/uL", 150, 400],
+            ["RBC", "10^6/uL", 4, 5.5],
+            ["Hematocrit", "%", 36, 46]
+        ];
+
+        form = document.createElement("div");
+        form.id = "cbcManualFields";
+        form.style.cssText =
+            "margin:16px 0;padding:16px;border:1px solid #294761;" +
+            "border-radius:12px;background:#091827;color:#e7f1fb;";
+
+        form.innerHTML = `
+            <h3>CBC Measurements</h3>
+            <p>Enter values and reference ranges as printed on the report.</p>
+            <div style="overflow-x:auto">
+                <table style="width:100%;text-align:left">
+                    <thead>
+                        <tr>
+                            <th>Test</th>
+                            <th>Value</th>
+                            <th>Unit</th>
+                            <th>Low</th>
+                            <th>High</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tests.map(([name, unit, low, high]) => `
+                            <tr>
+                                <td>${name}</td>
+                                <td><input type="number" step="any"
+                                    id="cbc_${name}_value"></td>
+                                <td>${unit}</td>
+                                <td><input type="number" step="any"
+                                    id="cbc_${name}_low" value="${low}"></td>
+                                <td><input type="number" step="any"
+                                    id="cbc_${name}_high" value="${high}"></td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+            <p style="color:#fbbf24;font-size:12px">
+                Replace example ranges with those on the actual report.
+            </p>
+        `;
+
+        uploadInput.insertAdjacentElement("beforebegin", form);
+    }
+
+    reportType.addEventListener("change", toggleCBCForm);
+    toggleCBCForm();
+});
+</script>
 
 </body>
 
